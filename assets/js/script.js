@@ -2,6 +2,7 @@ var searchInputText = "Hello";
 var searchInputElement = $("#search");
 var wordDefinitionArea = $(".definition");
 var wordPronunciationArea = $("#audio");
+var audioEl = $(".source")
 var wordExamples = $("#examples");
 var historyContainer = $(".previous-searches"); 
 var searchButton = $("#search-button"); 
@@ -38,27 +39,32 @@ const wordsOptions = {
             return response.json()
          }) .then(function(data){
             
-
+            console.log(data);
             console.log(data.definitions[0].definition);
          })
 
-    var audio = new AudioContext()
+    
          fetch(speechURL, speechOptions).then(function(response){
             return response
+            response => response.body.getReader()
+            //new AudioContext(response)
          }) .then(function(data){ 
+            console.log(data);
+            
+            //$(".source").attr("src", data.response.url);
             data=> data.arrayBuffer()})
-            //console.log(arrayBuffer))
-            .then(arrayBuffer => audio.decodeAudioData(arrayBuffer))
-            .then(decodedAudio => {
+            //console.log(arrayBuffer)
+             .then(arrayBuffer => audio.decodeAudioData(arrayBuffer))
+             .then(decodedAudio => {
                audio = decodedAudio;
-               //console.log(audio);
+               console.log(audio);
             })
-
-        };
-    
-         //validateResponse(data)
+            //validateResponse(data)
          //addHistoryItem(word)
          //renderWord()
+        };
+    
+         
   
 
   onsearch();
