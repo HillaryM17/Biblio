@@ -90,7 +90,7 @@ function renderWord(data) {
   });
 }
 
-// Data object for test purposes (exact structure will come from Hilary's onsearch function)
+// Placeholder Data object for testing renderWord(data) ... (exact structure will come from Hillary's onsearch function)
 let data = {
   definition:
     "Matt Example Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ",
