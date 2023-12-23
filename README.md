@@ -1,21 +1,21 @@
-# English-Helper
-Module 9 Project: This is a web page where a user can input a word and get a definition of that word (and possibly other information) and the user can find out how that word is pronounced.
+# Biblio
 
----
+We created this website to provide a place for a user to find pronunciation and definition of a word as well as examples of how to use the word in other context's. 
+
 
 ### Webpage
 
-Weather Dashboard
-https://stephdavid.github.io/English-Helper/
 
----
 
 ### Screenshots
 
----
 
+### Usage 
 
-### Acceptance Criteria
+In order to use the website the user will enter their desired word into the search bar, this will then provide the user with relevant definitions, examples and a pronunciation audio. 
+The user will be able to see their previous search history in the side bar, and will be able to navigate into the words by clicking on them. The user will also be able to remove from the local storage by pressing the small "x" inside each button. 
+
+### Acceptance Criteria 
 
 * With your team, you'll conceive and execute a design that solves a real-world problem by integrating data received from multiple server-side API requests. You'll also learn about agile development methodologies to help you work collaboratively. You'll implement feature and bug fixes using Git branch workflow and pull requests.
 
@@ -47,16 +47,7 @@ https://stephdavid.github.io/English-Helper/
  
 ---
 
-### Process
-
-* The project group agreed on a project to look up the definition of an English word and then pronounce that word, using the APIs https://rapidapi.com/dpventures/api/wordsapi/ and https://rapidapi.com/voicerss/api/text-to-speech-1/ 
-* Steph agreed to set up the GitHub repo and Project, and within the project create the necessary Tasks
-* Steph, Jeff and Matt discussed how the changes would be made to the Main repo. We agreed that branches could be used.
-* Steph set up the English-Helper repo, to add collaborators to the repo their GitHub user names are required. Steph asked for these in Slack
-* Jeff agreed to create mockup page to be presented in Figma
-* Steph proposed in Slack that, as a measure of organization, when a developer wants to merge their branch to the main branch, they create a "pull request", and another one of us can accept that pull request.
-
----
-
 ### References
+
+This website has been created by [Hillary Mason](https://github.com/HillaryM17), [Matt Lusty](https://github.com/mattlusty), [Jefferson Daley](https://github.com/Whefert) and [Ayodeji Fagbuaro](https://github.com/AyoFagbuaro). 
 
