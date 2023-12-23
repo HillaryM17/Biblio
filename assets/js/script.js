@@ -1,4 +1,4 @@
-var searchInputText = "Hello";
+var searchInputText = "Important";
 var searchInputElement = $("#search");
 var wordDefinitionArea = $(".definition");
 var wordPronunciationArea = $("#audio");
@@ -18,8 +18,11 @@ const speechOptions = {
 		'X-RapidAPI-Host': 'voicerss-text-to-speech.p.rapidapi.com'
 	}
 };
-
-const wordsURL = "https://wordsapiv1.p.rapidapi.com/words/" + searchInputText + "/definitions";
+const wordsBaseURL = "https://wordsapiv1.p.rapidapi.com/words/"
+const wordsDefinitions = "/definitions";
+const wordsExamples = "/examples";
+const wordsURLDefinitions = wordsBaseURL + searchInputText + wordsDefinitions;
+const wordsURLExamples = wordsBaseURL + searchInputText + wordsExamples;
 const wordsOptions = {
 	method: 'GET',
 	headers: {
@@ -35,12 +38,20 @@ const wordsOptions = {
 
   function onsearch() {
    
-         fetch(wordsURL, wordsOptions).then(function(response){
+         fetch(wordsURLDefinitions, wordsOptions).then(function(response){
             return response.json()
          }) .then(function(data){
             
             console.log(data);
             console.log(data.definitions[0].definition);
+            
+         })
+         fetch(wordsURLExamples, wordsOptions).then(function(response){
+            return response.json()
+         }) .then(function(data){
+            
+            console.log(data.examples[0]);
+            console.log(data)
          })
 
     
