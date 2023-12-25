@@ -1,6 +1,6 @@
 var searchInputText = "Hello";
 var searchInputElement = $("#search");
-var wordDefinitionArea = $("#definition");
+var wordDefinitionsArea = $("#result");
 var wordPronunciationArea = $("#pronunciation");
 var wordExamples = $("#examples");
 var historyContainer = $(".previous-searches");
@@ -29,10 +29,6 @@ const wordsOptions = {
   },
 };
 
-//$(".search-button").on("click", function () {
-
-//});
-
 function onsearch() {
   fetch(wordsURL, wordsOptions)
     .then(function (response) {
@@ -47,29 +43,38 @@ function onsearch() {
   });
 }
 
-// onsearch();
+function renderWord({ definitions, audio, examples }) {
+  renderFirstDefinition(definitions[0]);
+  attachAudioEventHandler(audio);
+  renderExamples(examples);
+}
 
-function renderWord(data) {
-  let definition = data.definition;
-  let audio = data.audio;
-  let examples = data.examples;
-
-  // Add word definition to DOM
-  wordDefinitionArea.text(definition);
-
-  // Add word audio data to DOM (COMING SOON!)
-  // wordPronunciationArea.attr("src", audio);
-
+function renderFirstDefinition(definition) {
   // Clear wordExamples container
+  wordDefinitionsArea.empty();
+
+  // Reconstruct wordExamples header
+  let wordDefinitionsHeader = $("<h2>");
+  wordDefinitionsHeader.text("Definition");
+  wordDefinitionsArea.append(wordDefinitionsHeader);
+
+  // Create element
+  let definitionElement = $("<p>");
+  // Append definition to element
+  definitionElement.append(definition);
+  // Append to DOM
+  wordDefinitionsArea.append(definitionElement);
+}
+
+function renderExamples(examples) {
   wordExamples.empty();
 
   // Reconstruct wordExamples header
-  let wordExamplesHeader = $("<h2>");
-  wordExamplesHeader.text("Examples");
-  wordExamples.append(wordExamplesHeader);
+  let examplesHeader = $("<h2>");
+  examplesHeader.text("Examples");
+  wordExamples.append(examplesHeader);
 
-  // Add each word example to DOM
-  examples.forEach(function (example, index) {
+  examples.forEach(function (example) {
     let title = example.title;
     let text = example.text;
 
@@ -90,11 +95,25 @@ function renderWord(data) {
   });
 }
 
-// Placeholder Data object for testing renderWord(data) ... (exact structure will come from Hillary's onsearch function)
+function attachAudioEventHandler(audio) {
+  wordPronunciationArea.on("click", function () {
+    let bufferSource = audio.context.createBufferSource();
+    bufferSource.buffer = audio.buffer;
+    bufferSource.connect(audio.context.destination);
+    bufferSource.start(audio.context.currentTime);
+  });
+}
+
+// =========================
+// Functions and Objects - for testing
+// =========================
+
 let data = {
-  definition:
-    "Matt Example Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ",
-  audio: "audioData",
+  definitions: [
+    "Matt Definition One Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ",
+    "Matt Definition Two Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ",
+  ],
+  audio: getDemoAudio(),
   examples: [
     {
       title: "Matt Example One",
@@ -107,5 +126,43 @@ let data = {
   ],
 };
 
-// Test call renderWord function
+function getDemoAudio() {
+  let speechURL =
+    "https://voicerss-text-to-speech.p.rapidapi.com/?key=171ec3cab6f247b4b6e7f596d9171ae7&src=donkey";
+  let otherStuff = "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono";
+  speechURL += otherStuff;
+
+  const speechOptions = {
+    method: "GET",
+    headers: {
+      "X-RapidAPI-Key": "6258e18b25mshd96a594dcf7fcb5p1b1fd6jsn955bae6d8f8b",
+      "X-RapidAPI-Host": "voicerss-text-to-speech.p.rapidapi.com",
+    },
+  };
+
+  let audio = {
+    context: new AudioContext(),
+    buffer: null,
+  };
+
+  fetch(speechURL, speechOptions)
+    .then(function (response) {
+      return response.arrayBuffer();
+    })
+
+    .then(function (buffer) {
+      return audio.context.decodeAudioData(buffer);
+    })
+
+    .then(function (decodedAudio) {
+      audio.buffer = decodedAudio;
+    });
+
+  return audio;
+}
+
+// =========================
+// Call renderWord function - for testing
+// =========================
+
 renderWord(data);
