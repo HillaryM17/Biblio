@@ -103,4 +103,21 @@ function attachAudioEventHandler(audio) {
   });
 }
 
+function removeHistoryItem(event) {
+  let index = $(event.currentTarget).attr("data-index");
+  history.splice(index, 1);
+  let stringHistory = JSON.stringify(history);
+  localStorage.setItem("history", stringHistory);
+  renderHistoryItems();
+}
+
+function addHistoryItem(item) {
+  history.push(item);
+  let stringHistory = JSON.stringify(history);
+  localStorage.setItem("history", stringHistory);
+  renderHistoryItems();
+}
+
 $(document).on("keypress", "#search", onsearch);
+
+$(".remove").on("click", "#search", removeHistoryItem);
