@@ -4,7 +4,6 @@ var wordDefinitionsArea = $("#result");
 var wordPronunciationArea = $("#pronunciation");
 var wordExamples = $("#examples");
 var historyContainer = $(".previous-searches");
-var searchButton = $("#search-button");
 var history = [];
 var favourites = [];
 
@@ -103,3 +102,5 @@ function attachAudioEventHandler(audio) {
     bufferSource.start(audio.context.currentTime);
   });
 }
+
+$(document).on("keypress", "#search", onsearch);
