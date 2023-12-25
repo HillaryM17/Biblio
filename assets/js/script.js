@@ -118,6 +118,8 @@ function addHistoryItem(item) {
   renderHistoryItems();
 }
 
-$(document).on("keypress", "#search", onsearch);
+$(document).on("keypress", "#search", (event) => {
+  if (event.key == "Enter") onsearch();
+});
 
 $(".remove").on("click", "#search", removeHistoryItem);
