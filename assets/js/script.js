@@ -7,10 +7,7 @@ var historyContainer = $(".previous-searches");
 var history = [];
 var favourites = [];
 
-const speechURL =
-  "https://voicerss-text-to-speech.p.rapidapi.com/?key=171ec3cab6f247b4b6e7f596d9171ae7&src=" +
-  searchInputText +
-  "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono";
+
 const speechOptions = {
   method: "GET",
   headers: {
@@ -21,8 +18,7 @@ const speechOptions = {
 const wordsBaseURL = "https://wordsapiv1.p.rapidapi.com/words/";
 const wordsDefinitions = "/definitions";
 const wordsExamples = "/examples";
-const wordsURLDefinitions = wordsBaseURL + searchInputText + wordsDefinitions;
-const wordsURLExamples = wordsBaseURL + searchInputText + wordsExamples;
+
 const wordsOptions = {
   method: "GET",
   headers: {
@@ -31,9 +27,24 @@ const wordsOptions = {
   },
 };
 
-function onsearch() {
-  let wordDefinitions = [];
+function validateInput(word) {
+   if (word.length < 1) {
+      return false
+   }
+      return true 
+}
+
+
+function onsearch(word) {
+   const speechURL =
+   "https://voicerss-text-to-speech.p.rapidapi.com/?key=171ec3cab6f247b4b6e7f596d9171ae7&src=" +
+   searchInputText +
+   "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono";
+   const wordsURLDefinitions = wordsBaseURL + searchInputText + wordsDefinitions;
+   const wordsURLExamples = wordsBaseURL + searchInputText + wordsExamples;
+   let wordDefinitions = [];
   let wordData = [];
+
   fetch(wordsURLDefinitions, wordsOptions)
     .then(function (response) {
       return response.json();
@@ -73,7 +84,7 @@ function onsearch() {
     });
   wordData.audio = audio;
   console.log("Word Data: ", wordData);
-  //renderWord(wordData);
+  renderWord(wordData);
   //validateResponse(data);
   //addHistoryItem(word);
 }
@@ -154,7 +165,16 @@ function addHistoryItem(item) {
 }
 
 $(document).on("keypress", "#search", (event) => {
-  if (event.key == "Enter") onsearch();
+   if (event.key == "Enter") 
+   {searchInputText = searchInputElement.val().trim()
+   if (validateInput(searchInputText)){
+      onsearch(searchInputText);
+   }
+   else {
+      // TODO: Invalid Input Alert/Modal
+      alert("Invalid Input");
+   }
+   }  
 });
 
 $(".remove").on("click", "#search", removeHistoryItem);
