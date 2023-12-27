@@ -1,4 +1,4 @@
-var searchInputText = "Hello";
+var searchInputText = "Important";
 var searchInputElement = $("#search");
 var wordDefinitionsArea = $("#result");
 var wordPronunciationArea = $("#pronunciation");
@@ -19,8 +19,11 @@ const speechOptions = {
     "X-RapidAPI-Host": "voicerss-text-to-speech.p.rapidapi.com",
   },
 };
-
-const wordsURL = "https://wordsapiv1.p.rapidapi.com/words/" + searchInputText + "/definitions";
+const wordsBaseURL = "https://wordsapiv1.p.rapidapi.com/words/";
+const wordsDefinitions = "/definitions";
+const wordsExamples = "/examples";
+const wordsURLDefinitions = wordsBaseURL + searchInputText + wordsDefinitions;
+const wordsURLExamples = wordsBaseURL + searchInputText + wordsExamples;
 const wordsOptions = {
   method: "GET",
   headers: {
@@ -30,17 +33,50 @@ const wordsOptions = {
 };
 
 function onsearch() {
-  fetch(wordsURL, wordsOptions)
+  let wordDefinitions = [];
+  let wordData = [];
+  fetch(wordsURLDefinitions, wordsOptions)
     .then(function (response) {
       return response.json();
     })
     .then(function (data) {
-      console.log("words data: ", data);
-    });
+      for (let i = 0; i < data.definitions.length; i++) {
+        wordDefinitions.push(data.definitions[i].definition);
+      }
 
-  fetch(speechURL, speechOptions).then(function (response) {
-    console.log(response);
-  });
+      wordData.definitions = wordDefinitions;
+      
+    });
+  fetch(wordsURLExamples, wordsOptions)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      wordData.examples = data.examples;
+    });
+  let audio = {
+    context: new AudioContext(),
+    buffer: null,
+  };
+  wordData["audio"] = audio;
+
+  fetch(speechURL, speechOptions)
+    .then(function (response) {
+      return response.arrayBuffer();
+    })
+
+    .then(function (buffer) {
+      return audio.context.decodeAudioData(buffer);
+    })
+
+    .then(function (decodedAudio) {
+      audio.buffer = decodedAudio;
+    });
+  wordData.audio = audio;
+  console.log("Word Data: ", wordData);
+  //renderWord(wordData);
+  //validateResponse(data);
+  //addHistoryItem(word);
 }
 
 function renderWord({ definitions, audio, examples }) {
@@ -103,3 +139,4 @@ function attachAudioEventHandler(audio) {
     bufferSource.start(audio.context.currentTime);
   });
 }
+
