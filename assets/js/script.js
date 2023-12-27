@@ -1,10 +1,9 @@
-var searchInputText = "Hello";
+var searchInputText = "Important";
 var searchInputElement = $("#search");
-var wordDefinitionArea = $("#definition");
+var wordDefinitionsArea = $("#result");
 var wordPronunciationArea = $("#pronunciation");
 var wordExamples = $("#examples");
 var historyContainer = $(".previous-searches");
-var searchButton = $("#search-button");
 var history = [];
 var favourites = [];
 
@@ -19,9 +18,11 @@ const speechOptions = {
     "X-RapidAPI-Host": "voicerss-text-to-speech.p.rapidapi.com",
   },
 };
-
-const wordsURL =
-  "https://wordsapiv1.p.rapidapi.com/words/" + searchInputText + "/definitions";
+const wordsBaseURL = "https://wordsapiv1.p.rapidapi.com/words/";
+const wordsDefinitions = "/definitions";
+const wordsExamples = "/examples";
+const wordsURLDefinitions = wordsBaseURL + searchInputText + wordsDefinitions;
+const wordsURLExamples = wordsBaseURL + searchInputText + wordsExamples;
 const wordsOptions = {
   method: "GET",
   headers: {
@@ -30,47 +31,85 @@ const wordsOptions = {
   },
 };
 
-//$(".search-button").on("click", function () {
-
-//});
-
 function onsearch() {
-  fetch(wordsURL, wordsOptions)
+  let wordDefinitions = [];
+  let wordData = [];
+  fetch(wordsURLDefinitions, wordsOptions)
     .then(function (response) {
       return response.json();
     })
     .then(function (data) {
-      console.log("words data: ", data);
-    });
+      for (let i = 0; i < data.definitions.length; i++) {
+        wordDefinitions.push(data.definitions[i].definition);
+      }
 
-  fetch(speechURL, speechOptions).then(function (response) {
-    console.log(response);
-  });
+      wordData.definitions = wordDefinitions;
+      
+    });
+  fetch(wordsURLExamples, wordsOptions)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      wordData.examples = data.examples;
+    });
+  let audio = {
+    context: new AudioContext(),
+    buffer: null,
+  };
+  wordData["audio"] = audio;
+
+  fetch(speechURL, speechOptions)
+    .then(function (response) {
+      return response.arrayBuffer();
+    })
+
+    .then(function (buffer) {
+      return audio.context.decodeAudioData(buffer);
+    })
+
+    .then(function (decodedAudio) {
+      audio.buffer = decodedAudio;
+    });
+  wordData.audio = audio;
+  console.log("Word Data: ", wordData);
+  //renderWord(wordData);
+  //validateResponse(data);
+  //addHistoryItem(word);
 }
 
-// onsearch();
+function renderWord({ definitions, audio, examples }) {
+  renderFirstDefinition(definitions[0]);
+  attachAudioEventHandler(audio);
+  renderExamples(examples);
+}
 
-function renderWord(data) {
-  let definition = data.definition;
-  let audio = data.audio;
-  let examples = data.examples;
-
-  // Add word definition to DOM
-  wordDefinitionArea.text(definition);
-
-  // Add word audio data to DOM (COMING SOON!)
-  // wordPronunciationArea.attr("src", audio);
-
+function renderFirstDefinition(definition) {
   // Clear wordExamples container
+  wordDefinitionsArea.empty();
+
+  // Reconstruct wordExamples header
+  let wordDefinitionsHeader = $("<h2>");
+  wordDefinitionsHeader.text("Definition");
+  wordDefinitionsArea.append(wordDefinitionsHeader);
+
+  // Create element
+  let definitionElement = $("<p>");
+  // Append definition to element
+  definitionElement.append(definition);
+  // Append to DOM
+  wordDefinitionsArea.append(definitionElement);
+}
+
+function renderExamples(examples) {
   wordExamples.empty();
 
   // Reconstruct wordExamples header
-  let wordExamplesHeader = $("<h2>");
-  wordExamplesHeader.text("Examples");
-  wordExamples.append(wordExamplesHeader);
+  let examplesHeader = $("<h2>");
+  examplesHeader.text("Examples");
+  wordExamples.append(examplesHeader);
 
-  // Add each word example to DOM
-  examples.forEach(function (example, index) {
+  examples.forEach(function (example) {
     let title = example.title;
     let text = example.text;
 
@@ -91,22 +130,32 @@ function renderWord(data) {
   });
 }
 
-// Data object for test purposes (exact structure will come from Hilary's onsearch function)
-let data = {
-  definition:
-    "Matt Example Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ",
-  audio: "audioData",
-  examples: [
-    {
-      title: "Matt Example One",
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    },
-    {
-      title: "Matt Example Two",
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    },
-  ],
-};
+function attachAudioEventHandler(audio) {
+  wordPronunciationArea.on("click", function () {
+    let bufferSource = audio.context.createBufferSource();
+    bufferSource.buffer = audio.buffer;
+    bufferSource.connect(audio.context.destination);
+    bufferSource.start(audio.context.currentTime);
+  });
+}
+function removeHistoryItem(event) {
+  let index = $(event.currentTarget).attr("data-index");
+  history.splice(index, 1);
+  let stringHistory = JSON.stringify(history);
+  localStorage.setItem("history", stringHistory);
+  renderHistoryItems();
+}
 
-// Test call renderWord function
-// renderWord(data);
+function addHistoryItem(item) {
+  history.push(item);
+  let stringHistory = JSON.stringify(history);
+  localStorage.setItem("history", stringHistory);
+  renderHistoryItems();
+}
+
+$(document).on("keypress", "#search", (event) => {
+  if (event.key == "Enter") onsearch();
+});
+
+$(".remove").on("click", "#search", removeHistoryItem);
+
