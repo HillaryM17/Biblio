@@ -4,7 +4,6 @@ var wordDefinitionsArea = $("#result");
 var wordPronunciationArea = $("#pronunciation");
 var wordExamples = $("#examples");
 var historyContainer = $(".previous-searches");
-var searchButton = $("#search-button");
 var history = [];
 var favourites = [];
 
@@ -139,4 +138,24 @@ function attachAudioEventHandler(audio) {
     bufferSource.start(audio.context.currentTime);
   });
 }
+function removeHistoryItem(event) {
+  let index = $(event.currentTarget).attr("data-index");
+  history.splice(index, 1);
+  let stringHistory = JSON.stringify(history);
+  localStorage.setItem("history", stringHistory);
+  renderHistoryItems();
+}
+
+function addHistoryItem(item) {
+  history.push(item);
+  let stringHistory = JSON.stringify(history);
+  localStorage.setItem("history", stringHistory);
+  renderHistoryItems();
+}
+
+$(document).on("keypress", "#search", (event) => {
+  if (event.key == "Enter") onsearch();
+});
+
+$(".remove").on("click", "#search", removeHistoryItem);
 
