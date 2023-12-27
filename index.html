@@ -1,100 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css"
+    />
+    <link rel="stylesheet" href="./assets/css/style.css" />
+    <title>Biblio</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" />
-  <link rel="stylesheet" href="./assets/css/style.css" />
-  <title>Biblio</title>
-</head>
-
-<body>
-  <header class="container-fluid d-flex" id="header">
-    <h1 style="margin: 20px">Biblio</h1>
-    <div class="row mx-auto align-items-center">
-      <div class="col">
-        <i class="bi bi-search"></i>
-        <label for="search"><input type="text" class="w-100 rounded-pill py-3" id="search" placeholder="Search a word"
-            name="search" /></label>
-      </div>
-    </div>
-  </header>
-
-  <main class="container mt-5 d-flex flex-column flex-md-row gx-2 mx-sm-1 mx-md-auto">
-    <div class="container">
-      <section id="result" class="my-1">
-        <h2>Definition</h2>
-        <p id="definition">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dignissimos
-          rerum veritatis doloremque doloribus, earum libero repudiandae tempore
-          quos saepe reiciendis qui impedit repellat voluptatem amet, nostrum
-          soluta rem quis voluptate. Neque necessitatibus quisquam, officiis,
-          sint quod quaerat, doloribus velit at quam rem hic id eligendi cum non.
-        </p>
-      </section>
-
-      <section id="pronunciation" class="my-1">
-        <h2>Pronunciation</h2>
-        <audio controls>
-          <source class= "source" type="audio/mpeg" />
-          Your browser does not support the audio element.
-        </audio>
-      </section>
-
-      <section id="examples" class="my-1">
-        <h2>Examples</h2>
-        <div>
-          <h3 class="fs-5">Example 1:</h3>
-          <span id="example-1">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-          </span>
-        </div>
-        <div>
-          <h3 class="fs-5">Example 2:</h3>
-          <span id="example-2">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-          </span>
-        </div>
-        <div>
-          <h3 class="fs-5">Example 3:</h3>
-          <span id="example-3">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-          </span>
-        </div>
-      </section>
-    </div>
-
-    <aside class="col previous-searches px-4 py-4 rounded-2 align-self-start w-100 mb-5">
-      <div class="row">
+  <body>
+    <header class="container-fluid d-flex" id="header">
+      <h1 style="margin: 20px">Biblio</h1>
+      <div class="row mx-auto align-items-center">
         <div class="col">
-          <h2>Previous Searches</h2>
+          <i class="bi bi-search"></i>
+          <label for="search"
+            ><input
+              type="text"
+              class="w-100 rounded-pill py-3"
+              id="search"
+              placeholder="Search a word"
+              name="search"
+          /></label>
         </div>
       </div>
-      <div class="row gy-2" id="search-history-items">
-        <div class="rounded-pill search-history-item w-100 d-flex align-items-center justify-content-between py-1">
-          <p class="m-0">Hello</p>
-          <i class="bi bi-x-lg"></i>
-        </div>
-        <div class="rounded-pill search-history-item w-100 d-flex align-items-center justify-content-between py-1">
-          <p class="m-0">Test</p>
-          <i class="bi bi-x-lg"></i>
-        </div>
+    </header>
+
+    <main class="container mt-5 d-flex flex-column flex-md-row gx-2 mx-sm-1 mx-md-auto">
+      <div class="container">
+        <section id="result" class="my-1">
+          <h2>Definition</h2>
+          <p id="definition">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dignissimos rerum veritatis
+            doloremque doloribus, earum libero repudiandae tempore quos saepe reiciendis qui impedit
+            repellat voluptatem amet, nostrum soluta rem quis voluptate. Neque necessitatibus
+            quisquam, officiis, sint quod quaerat, doloribus velit at quam rem hic id eligendi cum
+            non.
+          </p>
+        </section>
+        <section id="pronunciation" class="my-1">
+          <h2>Pronunciation</h2>
+          <audio controls>
+            <source src="" type="audio/mpeg" />
+            Your browser does not support the audio element.
+          </audio>
+        </section>
+        <section id="examples" class="my-1">
+          <h2>Examples</h2>
+          <div>
+            <h3 class="fs-5">Example 1:</h3>
+            <span id="example-1"> Lorem ipsum, dolor sit amet consectetur adipisicing elit. </span>
+          </div>
+          <div>
+            <h3 class="fs-5">Example 2:</h3>
+            <span id="example-2"> Lorem ipsum, dolor sit amet consectetur adipisicing elit. </span>
+          </div>
+          <div>
+            <h3 class="fs-5">Example 3:</h3>
+            <span id="example-3"> Lorem ipsum, dolor sit amet consectetur adipisicing elit. </span>
+          </div>
+        </section>
       </div>
-    </aside>
-  </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-    crossorigin="anonymous"></script>
-  <script src="https://code.jquery.com/jquery.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"
-    integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ"
-    crossorigin="anonymous"></script>
-  <!-- Code to the JavaScript File -->
-  <script src="assets/js/script.js"></script>
-</body>
+      <aside class="col previous-searches px-4 py-4 rounded-2 align-self-start w-100 mb-5">
+        <div class="row">
+          <div class="col">
+            <h2>Previous Searches</h2>
+          </div>
+        </div>
+        <div class="row gy-2" id="search-history-items">
+          <div
+            class="rounded-pill search-history-item w-100 d-flex align-items-center justify-content-between py-1"
+          >
+            <p class="m-0">Hello</p>
+            <i class="bi bi-x-lg"></i>
+          </div>
+          <div
+            class="rounded-pill search-history-item w-100 d-flex align-items-center justify-content-between py-1"
+          >
+            <p class="m-0">Test</p>
+            <i class="bi bi-x-lg"></i>
+          </div>
+        </div>
+      </aside>
+    </main>
 
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"
+      integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ"
+      crossorigin="anonymous"
+    ></script>
+    <!-- Code to the JavaScript File -->
+    <script src="assets/js/script.js"></script>
+  </body>
 </html>

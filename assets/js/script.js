@@ -1,8 +1,7 @@
 var searchInputText = "Important";
 var searchInputElement = $("#search");
-var wordDefinitionArea = $(".definition");
-var wordPronunciationArea = $("#audio");
-var audioEl = $(".source");
+var wordDefinitionsArea = $("#result");
+var wordPronunciationArea = $("#pronunciation");
 var wordExamples = $("#examples");
 var historyContainer = $(".previous-searches");
 var searchButton = $("#search-button");
@@ -32,87 +31,6 @@ const wordsOptions = {
     "X-RapidAPI-Host": "wordsapiv1.p.rapidapi.com",
   },
 };
-
-//$(".search-button").on("click", function () {
-
-//});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function onsearch() {
   let wordDefinitions = [];
@@ -161,4 +79,64 @@ function onsearch() {
   //addHistoryItem(word);
 }
 
-onsearch();
+function renderWord({ definitions, audio, examples }) {
+  renderFirstDefinition(definitions[0]);
+  attachAudioEventHandler(audio);
+  renderExamples(examples);
+}
+
+function renderFirstDefinition(definition) {
+  // Clear wordExamples container
+  wordDefinitionsArea.empty();
+
+  // Reconstruct wordExamples header
+  let wordDefinitionsHeader = $("<h2>");
+  wordDefinitionsHeader.text("Definition");
+  wordDefinitionsArea.append(wordDefinitionsHeader);
+
+  // Create element
+  let definitionElement = $("<p>");
+  // Append definition to element
+  definitionElement.append(definition);
+  // Append to DOM
+  wordDefinitionsArea.append(definitionElement);
+}
+
+function renderExamples(examples) {
+  wordExamples.empty();
+
+  // Reconstruct wordExamples header
+  let examplesHeader = $("<h2>");
+  examplesHeader.text("Examples");
+  wordExamples.append(examplesHeader);
+
+  examples.forEach(function (example) {
+    let title = example.title;
+    let text = example.text;
+
+    // Create elements
+    let exampleElement = $("<div>");
+    let exampleTitleElement = $("<h3 class='fs-5'>");
+    let exampleTextElement = $("<p>");
+
+    // Append to elements
+    exampleTitleElement.append(title);
+    exampleTextElement.append(text);
+
+    // Append sub-elements to example-element
+    exampleElement.append(exampleTitleElement, exampleTextElement);
+
+    // Append to DOM
+    wordExamples.append(exampleElement);
+  });
+}
+
+function attachAudioEventHandler(audio) {
+  wordPronunciationArea.on("click", function () {
+    let bufferSource = audio.context.createBufferSource();
+    bufferSource.buffer = audio.buffer;
+    bufferSource.connect(audio.context.destination);
+    bufferSource.start(audio.context.currentTime);
+  });
+}
+
