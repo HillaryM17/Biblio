@@ -1,12 +1,11 @@
 var searchInputText = "Important";
 var searchInputElement = $("#search");
-var wordDefinitionsArea = $("#result");
+var wordDefinitionsArea = $("#definitions");
 var wordPronunciationArea = $("#pronunciation");
 var wordExamples = $("#examples");
 var historyContainer = $(".previous-searches");
-var history = [];
+var historyArray = ["tinkywinky", "dipsie"];
 var favourites = [];
-
 
 const speechOptions = {
   method: "GET",
@@ -27,22 +26,27 @@ const wordsOptions = {
   },
 };
 
-function validateInput(word) {
-   if (word.length < 1) {
-      return false
-   }
-      return true 
+function init() {
+  renderHistory();
 }
 
+init();
+
+function validateInput(word) {
+  if (word.length < 1) {
+    return false;
+  }
+  return true;
+}
 
 function onsearch(word) {
-   const speechURL =
-   "https://voicerss-text-to-speech.p.rapidapi.com/?key=171ec3cab6f247b4b6e7f596d9171ae7&src=" +
-   searchInputText +
-   "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono";
-   const wordsURLDefinitions = wordsBaseURL + searchInputText + wordsDefinitions;
-   const wordsURLExamples = wordsBaseURL + searchInputText + wordsExamples;
-   let wordDefinitions = [];
+  const speechURL =
+    "https://voicerss-text-to-speech.p.rapidapi.com/?key=171ec3cab6f247b4b6e7f596d9171ae7&src=" +
+    searchInputText +
+    "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono";
+  const wordsURLDefinitions = wordsBaseURL + searchInputText + wordsDefinitions;
+  const wordsURLExamples = wordsBaseURL + searchInputText + wordsExamples;
+  let wordDefinitions = [];
   let wordData = [];
 
   fetch(wordsURLDefinitions, wordsOptions)
@@ -56,38 +60,37 @@ function onsearch(word) {
       wordData.definitions = wordDefinitions;
 
       fetch(wordsURLExamples, wordsOptions)
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (data) {
-      wordData.examples = data.examples;
-    
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          wordData.examples = data.examples;
 
-      let audio = {
-         context: new AudioContext(),
-         buffer: null,
-       };
-       wordData["audio"] = audio;
-     
-       fetch(speechURL, speechOptions)
-         .then(function (response) {
-           return response.arrayBuffer();
-         })
-     
-         .then(function (buffer) {
-           return audio.context.decodeAudioData(buffer);
-         })
-     
-         .then(function (decodedAudio) {
-           audio.buffer = decodedAudio;
-         });
-       wordData.audio = audio;
-       console.log("Word Data: ", wordData);
-       renderWord(wordData);
-    });
+          let audio = {
+            context: new AudioContext(),
+            buffer: null,
+          };
+          wordData["audio"] = audio;
+
+          fetch(speechURL, speechOptions)
+            .then(function (response) {
+              return response.arrayBuffer();
+            })
+
+            .then(function (buffer) {
+              return audio.context.decodeAudioData(buffer);
+            })
+
+            .then(function (decodedAudio) {
+              audio.buffer = decodedAudio;
+            });
+          wordData.audio = audio;
+          console.log("Word Data: ", wordData);
+          renderWord(wordData);
+          addHistoryItem(word);
+        });
     });
   //validateResponse(data);
-  //addHistoryItem(word);
 }
 
 function renderWord({ definitions, audio, examples }) {
@@ -98,19 +101,22 @@ function renderWord({ definitions, audio, examples }) {
 
 function renderFirstDefinition(definition) {
   // Clear wordExamples container
-  wordDefinitionsArea.empty();
+  // wordDefinitionsArea.empty();
 
   // Reconstruct wordExamples header
-  let wordDefinitionsHeader = $("<h2>");
-  wordDefinitionsHeader.text("Definition");
-  wordDefinitionsArea.append(wordDefinitionsHeader);
+  // let wordDefinitionsHeader = $("<h2>");
+  // wordDefinitionsHeader.text("Definition");
+  // wordDefinitionsArea.append(wordDefinitionsHeader);
+
+  wordDefinitionsArea.find("p").remove();
 
   // Create element
   let definitionElement = $("<p>");
+
   // Append definition to element
   definitionElement.append(definition);
   // Append to DOM
-  wordDefinitionsArea.append(definitionElement);
+  wordDefinitionsArea.prepend(definitionElement);
 }
 
 function renderExamples(examples) {
@@ -143,13 +149,15 @@ function renderExamples(examples) {
 }
 
 function attachAudioEventHandler(audio) {
-  wordPronunciationArea.on("click", function () {
+  let audioButton = wordPronunciationArea.find("button");
+  audioButton.on("click", function () {
     let bufferSource = audio.context.createBufferSource();
     bufferSource.buffer = audio.buffer;
     bufferSource.connect(audio.context.destination);
     bufferSource.start(audio.context.currentTime);
   });
 }
+
 function removeHistoryItem(event) {
   let index = $(event.currentTarget).attr("data-index");
   history.splice(index, 1);
@@ -166,17 +174,31 @@ function addHistoryItem(item) {
 }
 
 $(document).on("keypress", "#search", (event) => {
-   if (event.key == "Enter") 
-   {searchInputText = searchInputElement.val().trim()
-   if (validateInput(searchInputText)){
+  if (event.key == "Enter") {
+    searchInputText = searchInputElement.val().trim();
+    if (validateInput(searchInputText)) {
       onsearch(searchInputText);
-   }
-   else {
+    } else {
       // TODO: Invalid Input Alert/Modal
       alert("Invalid Input");
-   }
-   }  
+    }
+  }
 });
 
-$(".remove").on("click", "#search", removeHistoryItem);
+function renderHistory() {
+  console.log(history);
+  historyContainer.empty();
+  historyArray.forEach((wordItem) => {
+    let item = $(
+      "<div class='rounded-pill search-history-item w-100 d-flex align-items-center justify-content-between py-1'>"
+    );
+    let p = $("<p class='m-0'>");
+    let i = $("<i class='remove bi bi-x-lg'>");
 
+    p.append(wordItem);
+    item.append(p, i);
+    historyContainer.append(item);
+  });
+}
+
+$(".remove").on("click", "#search", removeHistoryItem);
