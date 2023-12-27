@@ -53,38 +53,39 @@ function onsearch(word) {
       for (let i = 0; i < data.definitions.length; i++) {
         wordDefinitions.push(data.definitions[i].definition);
       }
-
       wordData.definitions = wordDefinitions;
-      
-    });
-  fetch(wordsURLExamples, wordsOptions)
+
+      fetch(wordsURLExamples, wordsOptions)
     .then(function (response) {
       return response.json();
     })
     .then(function (data) {
       wordData.examples = data.examples;
+    
+
+      let audio = {
+         context: new AudioContext(),
+         buffer: null,
+       };
+       wordData["audio"] = audio;
+     
+       fetch(speechURL, speechOptions)
+         .then(function (response) {
+           return response.arrayBuffer();
+         })
+     
+         .then(function (buffer) {
+           return audio.context.decodeAudioData(buffer);
+         })
+     
+         .then(function (decodedAudio) {
+           audio.buffer = decodedAudio;
+         });
+       wordData.audio = audio;
+       console.log("Word Data: ", wordData);
+       renderWord(wordData);
     });
-  let audio = {
-    context: new AudioContext(),
-    buffer: null,
-  };
-  wordData["audio"] = audio;
-
-  fetch(speechURL, speechOptions)
-    .then(function (response) {
-      return response.arrayBuffer();
-    })
-
-    .then(function (buffer) {
-      return audio.context.decodeAudioData(buffer);
-    })
-
-    .then(function (decodedAudio) {
-      audio.buffer = decodedAudio;
     });
-  wordData.audio = audio;
-  console.log("Word Data: ", wordData);
-  renderWord(wordData);
   //validateResponse(data);
   //addHistoryItem(word);
 }
