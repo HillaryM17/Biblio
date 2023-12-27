@@ -59,3 +59,7 @@ nav a {
   color: var(--primary);
   background-color: var(--secondary);
 }
+
+#pronunciation h3 {
+  margin-bottom: 0px;
+}

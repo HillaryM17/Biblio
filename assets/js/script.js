@@ -20,7 +20,8 @@ const speechOptions = {
   },
 };
 
-const wordsURL = "https://wordsapiv1.p.rapidapi.com/words/" + searchInputText + "/definitions";
+const wordsURL =
+  "https://wordsapiv1.p.rapidapi.com/words/" + searchInputText + "/definitions";
 const wordsOptions = {
   method: "GET",
   headers: {
@@ -108,4 +109,4 @@ let data = {
 };
 
 // Test call renderWord function
-renderWord(data);
+// renderWord(data);
