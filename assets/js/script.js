@@ -100,14 +100,6 @@ function renderWord({ definitions, audio, examples }) {
 }
 
 function renderFirstDefinition(definition) {
-  // Clear wordExamples container
-  // wordDefinitionsArea.empty();
-
-  // Reconstruct wordExamples header
-  // let wordDefinitionsHeader = $("<h2>");
-  // wordDefinitionsHeader.text("Definition");
-  // wordDefinitionsArea.append(wordDefinitionsHeader);
-
   wordDefinitionsArea.find("p").remove();
 
   // Create element
