@@ -162,7 +162,7 @@ function addHistoryItem(item) {
   history.push(item);
   let stringHistory = JSON.stringify(history);
   localStorage.setItem("history", stringHistory);
-  renderHistoryItems();
+  // renderHistoryItems();
 }
 
 $(document).on("keypress", "#search", (event) => {
