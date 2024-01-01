@@ -1,7 +1,7 @@
 var searchInputText = "Important";
 var searchInputElement = $("#search");
 var wordDefinitionsArea = $("#definitions");
-var wordPronunciationArea = $("#pronunciation");
+var wordPronunciationButton = $("#pronunciation");
 var wordExamples = $("#examples");
 var historyContainer = $(".previous-searches");
 var historyArray = ["tinkywinky", "dipsie"];
@@ -27,7 +27,7 @@ const wordsOptions = {
 };
 
 function init() {
-  renderHistory();
+  // renderHistory();
 }
 
 init();
@@ -57,6 +57,7 @@ function onsearch(word) {
       for (let i = 0; i < data.definitions.length; i++) {
         wordDefinitions.push(data.definitions[i].definition);
       }
+      wordData.word = word;
       wordData.definitions = wordDefinitions;
 
       fetch(wordsURLExamples, wordsOptions)
@@ -93,64 +94,55 @@ function onsearch(word) {
   //validateResponse(data);
 }
 
-function renderWord({ definitions, audio, examples }) {
-  renderFirstDefinition(definitions[0]);
+function renderWord({ word, definitions, audio, examples }) {
+  $("#word").text(word);
+  wordDefinitionsArea.empty();
+  for (let i = 0; i < definitions.length; i++) {
+    renderDefinition(definitions[i], i);
+  }
   attachAudioEventHandler(audio);
-  renderExamples(examples);
+
+  wordExamples.empty();
+  for (let i = 0; i < examples.length; i++) {
+    renderExample(examples[i], i);
+  }
 }
 
-function renderFirstDefinition(definition) {
-  // Clear wordExamples container
-  // wordDefinitionsArea.empty();
-
-  // Reconstruct wordExamples header
-  // let wordDefinitionsHeader = $("<h2>");
-  // wordDefinitionsHeader.text("Definition");
-  // wordDefinitionsArea.append(wordDefinitionsHeader);
-
-  wordDefinitionsArea.find("p").remove();
+function renderDefinition(definition, number) {
+  // wordDefinitionsArea.find("p").remove();
 
   // Create element
   let definitionElement = $("<p>");
-
+  console.log(definition);
   // Append definition to element
-  definitionElement.append(definition);
+  definitionElement.text(
+    `${number + 1}. ${definition.charAt(0).toUpperCase() + definition.slice(1)}`
+  );
   // Append to DOM
-  wordDefinitionsArea.prepend(definitionElement);
+  wordDefinitionsArea.append(definitionElement);
 }
 
-function renderExamples(examples) {
-  wordExamples.empty();
+function renderExample(example, number) {
+  // Create elements
+  let exampleElement = $("<div class='col'>");
+  let exampleTextElement = $("<p>");
+  let exampleTitle = $("<span class='fw-bold'>");
+  exampleTitle.append(`Example ${number + 1}: `);
+  // Append to elements
+  exampleTextElement.append(exampleTitle);
+  exampleTextElement.append(
+    `${example.charAt(0).toUpperCase() + example.slice(1)}`
+  );
 
-  // Reconstruct wordExamples header
-  let examplesHeader = $("<h2>");
-  examplesHeader.text("Examples");
-  wordExamples.append(examplesHeader);
+  // Append sub-elements to example-element
+  exampleElement.append(exampleTextElement);
 
-  examples.forEach(function (example) {
-    let title = example.title;
-    let text = example.text;
-
-    // Create elements
-    let exampleElement = $("<div>");
-    let exampleTitleElement = $("<h3 class='fs-5'>");
-    let exampleTextElement = $("<p>");
-
-    // Append to elements
-    exampleTitleElement.append(title);
-    exampleTextElement.append(text);
-
-    // Append sub-elements to example-element
-    exampleElement.append(exampleTitleElement, exampleTextElement);
-
-    // Append to DOM
-    wordExamples.append(exampleElement);
-  });
+  // Append to DOM
+  wordExamples.append(exampleElement);
 }
 
 function attachAudioEventHandler(audio) {
-  let audioButton = wordPronunciationArea.find("button");
-  audioButton.on("click", function () {
+  $("#pronunciation").on("click", function () {
     let bufferSource = audio.context.createBufferSource();
     bufferSource.buffer = audio.buffer;
     bufferSource.connect(audio.context.destination);
@@ -170,7 +162,7 @@ function addHistoryItem(item) {
   history.push(item);
   let stringHistory = JSON.stringify(history);
   localStorage.setItem("history", stringHistory);
-  renderHistoryItems();
+  // renderHistoryItems();
 }
 
 $(document).on("keypress", "#search", (event) => {
