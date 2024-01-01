@@ -3,8 +3,8 @@ var searchInputElement = $("#search");
 var wordDefinitionsArea = $("#definitions");
 var wordPronunciationButton = $("#pronunciation");
 var wordExamples = $("#examples");
-var historyContainer = $(".previous-searches");
-var historyArray = ["tinkywinky", "dipsie"];
+var historyContainer = $("#search-history-items");
+
 var favourites = [];
 
 const speechOptions = {
@@ -27,7 +27,7 @@ const wordsOptions = {
 };
 
 function init() {
-  // renderHistory();
+  renderHistory();
 }
 
 init();
@@ -152,17 +152,24 @@ function attachAudioEventHandler(audio) {
 
 function removeHistoryItem(event) {
   let index = $(event.currentTarget).attr("data-index");
-  history.splice(index, 1);
-  let stringHistory = JSON.stringify(history);
-  localStorage.setItem("history", stringHistory);
-  renderHistoryItems();
+  let historyArray = JSON.parse(localStorage.getItem("history"));
+  historyArray.splice(index, 1);
+  historyArray = JSON.stringify(historyArray);
+  localStorage.setItem("history", historyArray);
+  renderHistory();
 }
 
 function addHistoryItem(item) {
-  history.push(item);
-  let stringHistory = JSON.stringify(history);
-  localStorage.setItem("history", stringHistory);
-  // renderHistoryItems();
+  if (localStorage.getItem("history")) {
+    historyArray = JSON.parse(localStorage.getItem("history"));
+    historyArray.push(item);
+    let stringHistory = JSON.stringify(historyArray);
+    localStorage.setItem("history", stringHistory);
+  } else {
+    localStorage.setItem("history", JSON.stringify([`${item}`]));
+  }
+
+  renderHistory();
 }
 
 $(document).on("keypress", "#search", (event) => {
@@ -178,19 +185,21 @@ $(document).on("keypress", "#search", (event) => {
 });
 
 function renderHistory() {
-  console.log(history);
+  let historyArray = JSON.parse(localStorage.getItem("history"));
   historyContainer.empty();
-  historyArray.forEach((wordItem) => {
-    let item = $(
-      "<div class='rounded-pill search-history-item w-100 d-flex align-items-center justify-content-between py-1'>"
-    );
-    let p = $("<p class='m-0'>");
-    let i = $("<i class='remove bi bi-x-lg'>");
+  if (historyArray) {
+    for (let i = 0; i < historyArray.length; i++) {
+      let item = $(
+        "<div class='rounded-pill search-history-item d-flex align-items-center justify-content-between py-1'>"
+      );
+      let p = $("<p class='m-0'>");
+      let icon = $(`<i class='remove bi bi-x-lg' data-index=${i}>`);
 
-    p.append(wordItem);
-    item.append(p, i);
-    historyContainer.append(item);
-  });
+      p.append(historyArray[i]);
+      item.append(p, icon);
+      historyContainer.append(item);
+    }
+  }
 }
 
-$(".remove").on("click", "#search", removeHistoryItem);
+$(".remove").on("click", removeHistoryItem);
