@@ -3,9 +3,18 @@ var searchInputElement = $("#search");
 var wordDefinitionsArea = $("#definitions");
 var wordPronunciationButton = $("#pronunciation");
 var wordExamples = $("#examples");
-var historyContainer = $(".previous-searches");
-var historyArray = ["tinkywinky", "dipsie"];
-var favourites = [];
+var historyContainer = $("#search-history-items");
+var randomWords = [
+  "rupee",
+  "oligarch",
+  "Cacao",
+  "Homer",
+  "recession",
+  "canny",
+  "foray",
+  "trove",
+  "saute",
+];
 
 const speechOptions = {
   method: "GET",
@@ -27,10 +36,9 @@ const wordsOptions = {
 };
 
 function init() {
-  // renderHistory();
+  onsearch(randomWords[Math.floor(Math.random() * randomWords.length)], true);
+  renderHistory();
 }
-
-init();
 
 function validateInput(word) {
   if (word.length < 1) {
@@ -39,7 +47,7 @@ function validateInput(word) {
   return true;
 }
 
-function onsearch(word) {
+function onsearch(word, init) {
   const speechURL =
     "https://voicerss-text-to-speech.p.rapidapi.com/?key=171ec3cab6f247b4b6e7f596d9171ae7&src=" +
     searchInputText +
@@ -88,7 +96,9 @@ function onsearch(word) {
           wordData.audio = audio;
           console.log("Word Data: ", wordData);
           renderWord(wordData);
-          addHistoryItem(word);
+          if (!init) {
+            addHistoryItem(word);
+          }
         });
     });
   //validateResponse(data);
@@ -152,24 +162,30 @@ function attachAudioEventHandler(audio) {
 
 function removeHistoryItem(event) {
   let index = $(event.currentTarget).attr("data-index");
-  history.splice(index, 1);
-  let stringHistory = JSON.stringify(history);
-  localStorage.setItem("history", stringHistory);
-  renderHistoryItems();
+  let historyArray = JSON.parse(localStorage.getItem("history"));
+  historyArray.splice(index, 1);
+  historyArray = JSON.stringify(historyArray);
+  localStorage.setItem("history", historyArray);
+  renderHistory();
 }
 
 function addHistoryItem(item) {
-  history.push(item);
-  let stringHistory = JSON.stringify(history);
-  localStorage.setItem("history", stringHistory);
-  // renderHistoryItems();
+  if (localStorage.getItem("history")) {
+    historyArray = JSON.parse(localStorage.getItem("history"));
+    historyArray.push(item);
+    let stringHistory = JSON.stringify(historyArray);
+    localStorage.setItem("history", stringHistory);
+  } else {
+    localStorage.setItem("history", JSON.stringify([`${item}`]));
+  }
+  renderHistory();
 }
 
 $(document).on("keypress", "#search", (event) => {
   if (event.key == "Enter") {
     searchInputText = searchInputElement.val().trim();
     if (validateInput(searchInputText)) {
-      onsearch(searchInputText);
+      onsearch(searchInputText, false);
     } else {
       // TODO: Invalid Input Alert/Modal
       alert("Invalid Input");
@@ -178,19 +194,22 @@ $(document).on("keypress", "#search", (event) => {
 });
 
 function renderHistory() {
-  console.log(history);
+  let historyArray = JSON.parse(localStorage.getItem("history"));
   historyContainer.empty();
-  historyArray.forEach((wordItem) => {
-    let item = $(
-      "<div class='rounded-pill search-history-item w-100 d-flex align-items-center justify-content-between py-1'>"
-    );
-    let p = $("<p class='m-0'>");
-    let i = $("<i class='remove bi bi-x-lg'>");
+  if (historyArray) {
+    for (let i = 0; i < historyArray.length; i++) {
+      let item = $(
+        "<div class='rounded-pill search-history-item d-flex align-items-center justify-content-between py-1'>"
+      );
+      let p = $(`<p class='m-0'>`);
+      let icon = $(`<i class='remove bi bi-x-lg' data-index=${i}>`);
 
-    p.append(wordItem);
-    item.append(p, i);
-    historyContainer.append(item);
-  });
+      p.append(historyArray[i]);
+      item.append(p, icon);
+      historyContainer.append(item);
+    }
+  }
 }
 
-$(".remove").on("click", "#search", removeHistoryItem);
+init();
+$("#search-history-items").on("click", ".remove", removeHistoryItem);
