@@ -4,8 +4,17 @@ var wordDefinitionsArea = $("#definitions");
 var wordPronunciationButton = $("#pronunciation");
 var wordExamples = $("#examples");
 var historyContainer = $("#search-history-items");
-
-var favourites = [];
+var randomWords = [
+  "rupee",
+  "oligarch",
+  "Cacao",
+  "Homer",
+  "recession",
+  "canny",
+  "foray",
+  "trove",
+  "saute",
+];
 
 const speechOptions = {
   method: "GET",
@@ -27,10 +36,9 @@ const wordsOptions = {
 };
 
 function init() {
+  onsearch(randomWords[Math.floor(Math.random() * randomWords.length)], true);
   renderHistory();
 }
-
-init();
 
 function validateInput(word) {
   if (word.length < 1) {
@@ -39,7 +47,7 @@ function validateInput(word) {
   return true;
 }
 
-function onsearch(word) {
+function onsearch(word, init) {
   const speechURL =
     "https://voicerss-text-to-speech.p.rapidapi.com/?key=171ec3cab6f247b4b6e7f596d9171ae7&src=" +
     searchInputText +
@@ -88,7 +96,9 @@ function onsearch(word) {
           wordData.audio = audio;
           console.log("Word Data: ", wordData);
           renderWord(wordData);
-          addHistoryItem(word);
+          if (!init) {
+            addHistoryItem(word);
+          }
         });
     });
   //validateResponse(data);
@@ -168,7 +178,6 @@ function addHistoryItem(item) {
   } else {
     localStorage.setItem("history", JSON.stringify([`${item}`]));
   }
-
   renderHistory();
 }
 
@@ -176,7 +185,7 @@ $(document).on("keypress", "#search", (event) => {
   if (event.key == "Enter") {
     searchInputText = searchInputElement.val().trim();
     if (validateInput(searchInputText)) {
-      onsearch(searchInputText);
+      onsearch(searchInputText, false);
     } else {
       // TODO: Invalid Input Alert/Modal
       alert("Invalid Input");
@@ -192,7 +201,7 @@ function renderHistory() {
       let item = $(
         "<div class='rounded-pill search-history-item d-flex align-items-center justify-content-between py-1'>"
       );
-      let p = $("<p class='m-0'>");
+      let p = $(`<p class='m-0'>`);
       let icon = $(`<i class='remove bi bi-x-lg' data-index=${i}>`);
 
       p.append(historyArray[i]);
@@ -202,4 +211,5 @@ function renderHistory() {
   }
 }
 
-$(".remove").on("click", removeHistoryItem);
+init();
+$("#search-history-items").on("click", ".remove", removeHistoryItem);
