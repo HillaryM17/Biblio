@@ -139,22 +139,11 @@ function renderExample(example, number) {
   exampleTitle.append(`Example ${number + 1}: `);
   // Append to elements
   exampleTextElement.append(exampleTitle);
-  exampleTextElement.append(
-    `${example.charAt(0).toUpperCase() + example.slice(1)}`
-  );
+  exampleTextElement.append(`${example.charAt(0).toUpperCase() + example.slice(1)}`);
   // Append sub-elements to example-element
   exampleElement.append(exampleTextElement);
   // Append to DOM
   wordExamples.append(exampleElement);
-}
-
-function attachAudioEventHandler(audio) {
-  $("#pronunciation").on("click", function () {
-    let bufferSource = audio.context.createBufferSource();
-    bufferSource.buffer = audio.buffer;
-    bufferSource.connect(audio.context.destination);
-    bufferSource.start(audio.context.currentTime);
-  });
 }
 
 function removeHistoryItem(event) {
@@ -212,6 +201,17 @@ function renderHistory() {
     }
   }
 }
+
+function attachAudioEventHandler(audio) {
+  wordPronunciationButton.off("click");
+  wordPronunciationButton.on("click", function () {
+    let bufferSource = audio.context.createBufferSource();
+    bufferSource.buffer = audio.buffer;
+    bufferSource.connect(audio.context.destination);
+    bufferSource.start(audio.context.currentTime);
+  });
+}
+
 $("#search-history-items").on("click", ".remove", removeHistoryItem);
 $("#search-history-items").on("click", ".searched-word", searchHistoryItem);
 
