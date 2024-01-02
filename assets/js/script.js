@@ -53,50 +53,64 @@ function onsearch(word, initOrSearchHistory) {
     "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono";
   const wordsURLDefinitions = wordsBaseURL + word + wordsDefinitions;
   const wordsURLExamples = wordsBaseURL + word + wordsExamples;
-  let wordDefinitions = [];
-  let wordData = {};
 
+  // Declare wordData object (and initialise with relevant objects)
+  let wordData = {
+    word: word,
+    definitions: [],
+    examples: null,
+    audio: {
+      context: new AudioContext(),
+      buffer: null,
+    },
+  };
+
+  // Fetch definitions data ...
   fetch(wordsURLDefinitions, wordsOptions)
     .then(function (response) {
       return response.json();
     })
     .then(function (data) {
-      for (let i = 0; i < data.definitions.length; i++) {
-        wordDefinitions.push(data.definitions[i].definition);
+      // Fetch definitions is now complete!
+      // Now just load into the wordData object ...
+      let definitions = wordData.definitions;
+      for (let i = 0; i < definitions.length; i++) {
+        definitions.push(data.definitions[i].definition);
       }
-      wordData.word = word;
-      wordData.definitions = wordDefinitions;
 
+      // Fetch examples data
       fetch(wordsURLExamples, wordsOptions)
         .then(function (response) {
           return response.json();
         })
         .then(function (data) {
+          // Fetch examples data is complete!
+          // Now just load into the wordData object ...
           wordData.examples = data.examples;
 
-          let audio = {
-            context: new AudioContext(),
-            buffer: null,
-          };
-          wordData["audio"] = audio;
-
+          // Fetch audio data (buffer) ...
           fetch(speechURL, speechOptions)
             .then(function (response) {
               return response.arrayBuffer();
             })
 
-            .then(function (buffer) {
-              return audio.context.decodeAudioData(buffer);
+            .then(function (arrayBuffer) {
+              return wordData.audio.context.decodeAudioData(arrayBuffer);
             })
 
-            .then(function (decodedAudio) {
-              audio.buffer = decodedAudio;
+            .then(function (decodedAudioBuffer) {
+              // Fetch audio buffer complete!
+              // Now just load into the wordData object ...
+              wordData.audio.buffer = decodedAudioBuffer;
             });
-          wordData.audio = audio;
+
+          // wordData is now complete (except for audio.buffer, but renderWord does not depend on that)
           renderWord(wordData);
+
           if (!initOrSearchHistory) {
             addHistoryItem(word);
           }
+
           searchInputElement.val("");
         });
     })
