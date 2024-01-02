@@ -1,4 +1,3 @@
-var searchInputText = "Important";
 var searchInputElement = $("#search");
 var wordDefinitionsArea = $("#definitions");
 var wordPronunciationButton = $("#pronunciation");
@@ -47,13 +46,13 @@ function validateInput(word) {
   return true;
 }
 
-function onsearch(word, init) {
+function onsearch(word, initOrSearchHistory) {
   const speechURL =
     "https://voicerss-text-to-speech.p.rapidapi.com/?key=171ec3cab6f247b4b6e7f596d9171ae7&src=" +
-    searchInputText +
+    word +
     "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono";
-  const wordsURLDefinitions = wordsBaseURL + searchInputText + wordsDefinitions;
-  const wordsURLExamples = wordsBaseURL + searchInputText + wordsExamples;
+  const wordsURLDefinitions = wordsBaseURL + word + wordsDefinitions;
+  const wordsURLExamples = wordsBaseURL + word + wordsExamples;
   let wordDefinitions = [];
   let wordData = [];
 
@@ -96,12 +95,14 @@ function onsearch(word, init) {
           wordData.audio = audio;
           console.log("Word Data: ", wordData);
           renderWord(wordData);
-          if (!init) {
+          if (!initOrSearchHistory) {
             addHistoryItem(word);
           }
+
+          searchInputElement.val("");
+          console.dir(searchInputElement);
         });
     });
-  //validateResponse(data);
 }
 
 function renderWord({ word, definitions, audio, examples }) {
@@ -119,8 +120,6 @@ function renderWord({ word, definitions, audio, examples }) {
 }
 
 function renderDefinition(definition, number) {
-  // wordDefinitionsArea.find("p").remove();
-
   // Create element
   let definitionElement = $("<p>");
   console.log(definition);
@@ -143,10 +142,8 @@ function renderExample(example, number) {
   exampleTextElement.append(
     `${example.charAt(0).toUpperCase() + example.slice(1)}`
   );
-
   // Append sub-elements to example-element
   exampleElement.append(exampleTextElement);
-
   // Append to DOM
   wordExamples.append(exampleElement);
 }
@@ -169,6 +166,11 @@ function removeHistoryItem(event) {
   renderHistory();
 }
 
+function searchHistoryItem(event) {
+  let word = $(event.currentTarget).attr("data-word");
+  onsearch(word, true);
+}
+
 function addHistoryItem(item) {
   if (localStorage.getItem("history")) {
     historyArray = JSON.parse(localStorage.getItem("history"));
@@ -183,7 +185,7 @@ function addHistoryItem(item) {
 
 $(document).on("keypress", "#search", (event) => {
   if (event.key == "Enter") {
-    searchInputText = searchInputElement.val().trim();
+    let searchInputText = searchInputElement.val().trim();
     if (validateInput(searchInputText)) {
       onsearch(searchInputText, false);
     } else {
@@ -201,7 +203,7 @@ function renderHistory() {
       let item = $(
         "<div class='rounded-pill search-history-item d-flex align-items-center justify-content-between py-1'>"
       );
-      let p = $(`<p class='m-0'>`);
+      let p = $(`<p class='m-0 searched-word' data-word=${historyArray[i]}>`);
       let icon = $(`<i class='remove bi bi-x-lg' data-index=${i}>`);
 
       p.append(historyArray[i]);
@@ -210,6 +212,7 @@ function renderHistory() {
     }
   }
 }
+$("#search-history-items").on("click", ".remove", removeHistoryItem);
+$("#search-history-items").on("click", ".searched-word", searchHistoryItem);
 
 init();
-$("#search-history-items").on("click", ".remove", removeHistoryItem);
