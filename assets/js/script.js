@@ -1,3 +1,7 @@
+///////////////////////////////////////////////////////////////
+// Initialise Global Variables
+///////////////////////////////////////////////////////////////
+
 var searchInputElement = $("#search");
 var wordDefinitionsArea = $("#definitions");
 var wordPronunciationButton = $("#pronunciation");
@@ -15,49 +19,64 @@ var randomWords = [
   "saute",
 ];
 
-const speechOptions = {
-  method: "GET",
-  headers: {
-    "X-RapidAPI-Key": "6258e18b25mshd96a594dcf7fcb5p1b1fd6jsn955bae6d8f8b",
-    "X-RapidAPI-Host": "voicerss-text-to-speech.p.rapidapi.com",
-  },
-};
-const wordsBaseURL = "https://wordsapiv1.p.rapidapi.com/words/";
-const wordsDefinitions = "/definitions";
-const wordsExamples = "/examples";
+///////////////////////////////////////////////////////////////
+// API STUFF
+///////////////////////////////////////////////////////////////
 
+// API Keys
+const rapidAPIKey = "6258e18b25mshd96a594dcf7fcb5p1b1fd6jsn955bae6d8f8b";
+const speechAPIKey = "17e8c83f04474613b13eb338fe823dd1";
+
+// API Base URLs
+const wordsBaseURL = "https://wordsapiv1.p.rapidapi.com/words/";
+const speechBaseURL = "https://voicerss-text-to-speech.p.rapidapi.com/?";
+
+// Words API Options Object
 const wordsOptions = {
   method: "GET",
   headers: {
-    "X-RapidAPI-Key": "6258e18b25mshd96a594dcf7fcb5p1b1fd6jsn955bae6d8f8b",
+    "X-RapidAPI-Key": rapidAPIKey,
     "X-RapidAPI-Host": "wordsapiv1.p.rapidapi.com",
   },
 };
 
-function init() {
-  onsearch(randomWords[Math.floor(Math.random() * randomWords.length)], true);
-  renderHistory();
+// Speech API Options Object
+const speechOptions = {
+  method: "GET",
+  headers: {
+    "X-RapidAPI-Key": rapidAPIKey,
+    "X-RapidAPI-Host": "voicerss-text-to-speech.p.rapidapi.com",
+  },
+};
+
+// Helper Function
+
+function constructFullURLs(word) {
+  return {
+    definitionsURL: "https://wordsapiv1.p.rapidapi.com/words/" + word + "/definitions",
+    examplesURL: "https://wordsapiv1.p.rapidapi.com/words/" + word + "/examples",
+    speechURL:
+      "https://voicerss-text-to-speech.p.rapidapi.com/?" +
+      "key=" +
+      speechAPIKey +
+      "&src=" +
+      word +
+      "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono",
+  };
 }
 
-function validateInput(word) {
-  if (word.length < 1) {
-    return false;
-  }
-  return true;
-}
+///////////////////////////////////////////////////////////////
+// ONSEARCH FUNCTION
+///////////////////////////////////////////////////////////////
 
 function onsearch(word, initOrSearchHistory) {
-  const speechURL =
-    "https://voicerss-text-to-speech.p.rapidapi.com/?key=17e8c83f04474613b13eb338fe823dd1&src=" +
-    word +
-    "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono";
-  const wordsURLDefinitions = wordsBaseURL + word + wordsDefinitions;
-  const wordsURLExamples = wordsBaseURL + word + wordsExamples;
+  // Construct Full API Query URLS
+  const { definitionsURL, examplesURL, speechURL } = constructFullURLs(word);
 
-  // Declare wordData object (and initialise with relevant objects)
+  // Declare new wordData object
   let wordData = {
     word: word,
-    definitions: [],
+    definitions: null,
     examples: null,
     audio: {
       context: new AudioContext(),
@@ -66,25 +85,27 @@ function onsearch(word, initOrSearchHistory) {
   };
 
   // Fetch definitions data ...
-  fetch(wordsURLDefinitions, wordsOptions)
+  fetch(definitionsURL, wordsOptions)
     .then(function (response) {
       return response.json();
     })
     .then(function (data) {
-      // Fetch definitions is now complete!
+      // Definitions fetch is complete!
+
       // Now just load into the wordData object ...
-      let definitions = wordData.definitions;
-      for (let i = 0; i < definitions.length; i++) {
-        definitions.push(data.definitions[i].definition);
+      wordData.definitions = [];
+      for (let i = 0; i < data.definitions.length; i++) {
+        wordData.definitions.push(data.definitions[i].definition);
       }
 
       // Fetch examples data
-      fetch(wordsURLExamples, wordsOptions)
+      fetch(examplesURL, wordsOptions)
         .then(function (response) {
           return response.json();
         })
         .then(function (data) {
-          // Fetch examples data is complete!
+          // Examples fetch is complete!
+
           // Now just load into the wordData object ...
           wordData.examples = data.examples;
 
@@ -99,7 +120,8 @@ function onsearch(word, initOrSearchHistory) {
             })
 
             .then(function (decodedAudioBuffer) {
-              // Fetch audio buffer complete!
+              // Audio data fetch is complete!
+
               // Now just load into the wordData object ...
               wordData.audio.buffer = decodedAudioBuffer;
             });
@@ -118,6 +140,10 @@ function onsearch(word, initOrSearchHistory) {
       showErrorMessage("invalidSearch");
     });
 }
+
+///////////////////////////////////////////////////////////////
+// RENDER FUNCTIONS
+///////////////////////////////////////////////////////////////
 
 function renderWord({ word, definitions, audio, examples }) {
   $("#word").text(word);
@@ -159,6 +185,24 @@ function renderExample(example, number) {
   wordExamples.append(exampleElement);
 }
 
+function renderHistory() {
+  let historyArray = JSON.parse(localStorage.getItem("history"));
+  historyContainer.empty();
+  if (historyArray) {
+    for (let i = 0; i < historyArray.length; i++) {
+      let item = $(
+        "<div class='rounded-pill search-history-item d-flex align-items-center justify-content-between py-1'>"
+      );
+      let p = $(`<p class='m-0 searched-word' data-word=${historyArray[i]}>`);
+      let icon = $(`<i class='remove bi bi-x-lg' data-index=${i}>`);
+
+      p.append(historyArray[i]);
+      item.append(p, icon);
+      historyContainer.append(item);
+    }
+  }
+}
+
 function removeHistoryItem(event) {
   let index = $(event.currentTarget).attr("data-index");
   let historyArray = JSON.parse(localStorage.getItem("history"));
@@ -185,6 +229,21 @@ function addHistoryItem(item) {
   renderHistory();
 }
 
+///////////////////////////////////////////////////////////////
+// VALIDATION FUNCTIONS
+///////////////////////////////////////////////////////////////
+
+function validateInput(word) {
+  if (word.length < 1) {
+    return false;
+  }
+  return true;
+}
+
+///////////////////////////////////////////////////////////////
+// EVENT LISTENERS / HANDLERS
+///////////////////////////////////////////////////////////////
+
 $(document).on("keypress", "#search", (event) => {
   if (event.key == "Enter") {
     let searchInputText = searchInputElement.val().trim();
@@ -196,24 +255,6 @@ $(document).on("keypress", "#search", (event) => {
     }
   }
 });
-
-function renderHistory() {
-  let historyArray = JSON.parse(localStorage.getItem("history"));
-  historyContainer.empty();
-  if (historyArray) {
-    for (let i = 0; i < historyArray.length; i++) {
-      let item = $(
-        "<div class='rounded-pill search-history-item d-flex align-items-center justify-content-between py-1'>"
-      );
-      let p = $(`<p class='m-0 searched-word' data-word=${historyArray[i]}>`);
-      let icon = $(`<i class='remove bi bi-x-lg' data-index=${i}>`);
-
-      p.append(historyArray[i]);
-      item.append(p, icon);
-      historyContainer.append(item);
-    }
-  }
-}
 
 function attachAudioEventHandler(audio) {
   wordPronunciationButton.off("click");
@@ -243,4 +284,14 @@ function showErrorMessage(errorType) {
   });
   myModal.show();
 }
+
+///////////////////////////////////////////////////////////////
+// INITIALISE
+///////////////////////////////////////////////////////////////
+
+function init() {
+  onsearch(randomWords[Math.floor(Math.random() * randomWords.length)], true);
+  renderHistory();
+}
+
 init();
