@@ -9,8 +9,7 @@ See link to the deployed application [here](https://hillarym17.github.io/Biblio/
 
 ## Screenshots
 
-
-
+![Biblio demo video](https://github.com/HillaryM17/Biblio/blob/dev/assets/images/Biblio.gif)
 
 ## Acceptance Criteria 
 
