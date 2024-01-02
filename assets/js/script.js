@@ -93,7 +93,6 @@ function onsearch(word, initOrSearchHistory) {
               audio.buffer = decodedAudio;
             });
           wordData.audio = audio;
-          console.log("Word Data: ", wordData);
           renderWord(wordData);
           if (!initOrSearchHistory) {
             addHistoryItem(word);
@@ -102,7 +101,6 @@ function onsearch(word, initOrSearchHistory) {
         });
     })
     .catch((err) => {
-      console.log("Catch 1");
       showErrorMessage("invalidSearch");
     });
 }
@@ -124,7 +122,6 @@ function renderWord({ word, definitions, audio, examples }) {
 function renderDefinition(definition, number) {
   // Create element
   let definitionElement = $("<p>");
-  console.log(definition);
   // Append definition to element
   definitionElement.text(
     `${number + 1}. ${definition.charAt(0).toUpperCase() + definition.slice(1)}`
@@ -141,9 +138,7 @@ function renderExample(example, number) {
   exampleTitle.append(`Example ${number + 1}: `);
   // Append to elements
   exampleTextElement.append(exampleTitle);
-  exampleTextElement.append(
-    `${example.charAt(0).toUpperCase() + example.slice(1)}`
-  );
+  exampleTextElement.append(`${example.charAt(0).toUpperCase() + example.slice(1)}`);
   // Append sub-elements to example-element
   exampleElement.append(exampleTextElement);
   // Append to DOM
@@ -225,9 +220,7 @@ function showErrorMessage(errorType) {
     $(".modal-body p").text("Search cannot be empty.");
   } else if (errorType == "invalidSearch") {
     $(".modal-header h5").text("Invalid Search");
-    $(".modal-body p").text(
-      "Word not found. Please check spelling and try again"
-    );
+    $(".modal-body p").text("Word not found. Please check spelling and try again");
   } else {
     return;
   }
