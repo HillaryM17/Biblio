@@ -35,7 +35,8 @@ const wordsOptions = {
 };
 
 function init() {
-  onsearch(randomWords[Math.floor(Math.random() * randomWords.length)], true);
+  let randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
+  onsearch(randomWord, true);
   renderHistory();
 }
 
@@ -54,7 +55,7 @@ function onsearch(word, initOrSearchHistory) {
   const wordsURLDefinitions = wordsBaseURL + word + wordsDefinitions;
   const wordsURLExamples = wordsBaseURL + word + wordsExamples;
   let wordDefinitions = [];
-  let wordData = [];
+  let wordData = {};
 
   fetch(wordsURLDefinitions, wordsOptions)
     .then(function (response) {
@@ -78,7 +79,7 @@ function onsearch(word, initOrSearchHistory) {
             context: new AudioContext(),
             buffer: null,
           };
-          wordData["audio"] = audio;
+          wordData.audio = audio;
 
           fetch(speechURL, speechOptions)
             .then(function (response) {
@@ -139,9 +140,7 @@ function renderExample(example, number) {
   exampleTitle.append(`Example ${number + 1}: `);
   // Append to elements
   exampleTextElement.append(exampleTitle);
-  exampleTextElement.append(
-    `${example.charAt(0).toUpperCase() + example.slice(1)}`
-  );
+  exampleTextElement.append(`${example.charAt(0).toUpperCase() + example.slice(1)}`);
   // Append sub-elements to example-element
   exampleElement.append(exampleTextElement);
   // Append to DOM
@@ -149,7 +148,8 @@ function renderExample(example, number) {
 }
 
 function attachAudioEventHandler(audio) {
-  $("#pronunciation").on("click", function () {
+  wordPronunciationButton.off("click");
+  wordPronunciationButton.on("click", function () {
     let bufferSource = audio.context.createBufferSource();
     bufferSource.buffer = audio.buffer;
     bufferSource.connect(audio.context.destination);
@@ -183,18 +183,6 @@ function addHistoryItem(item) {
   renderHistory();
 }
 
-$(document).on("keypress", "#search", (event) => {
-  if (event.key == "Enter") {
-    let searchInputText = searchInputElement.val().trim();
-    if (validateInput(searchInputText)) {
-      onsearch(searchInputText, false);
-    } else {
-      // TODO: Invalid Input Alert/Modal
-      alert("Invalid Input");
-    }
-  }
-});
-
 function renderHistory() {
   let historyArray = JSON.parse(localStorage.getItem("history"));
   historyContainer.empty();
@@ -212,6 +200,19 @@ function renderHistory() {
     }
   }
 }
+
+$(document).on("keypress", "#search", (event) => {
+  if (event.key == "Enter") {
+    let searchInputText = searchInputElement.val().trim();
+    if (validateInput(searchInputText)) {
+      onsearch(searchInputText, false);
+    } else {
+      // TODO: Invalid Input Alert/Modal
+      alert("Invalid Input");
+    }
+  }
+});
+
 $("#search-history-items").on("click", ".remove", removeHistoryItem);
 $("#search-history-items").on("click", ".searched-word", searchHistoryItem);
 
