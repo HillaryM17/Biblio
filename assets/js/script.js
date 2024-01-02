@@ -48,13 +48,13 @@ function validateInput(word) {
 
 function onsearch(word, initOrSearchHistory) {
   const speechURL =
-    "https://voicerss-text-to-speech.p.rapidapi.com/?key=171ec3cab6f247b4b6e7f596d9171ae7&src=" +
+    "https://voicerss-text-to-speech.p.rapidapi.com/?key=17e8c83f04474613b13eb338fe823dd1&src=" +
     word +
     "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono";
   const wordsURLDefinitions = wordsBaseURL + word + wordsDefinitions;
   const wordsURLExamples = wordsBaseURL + word + wordsExamples;
   let wordDefinitions = [];
-  let wordData = [];
+  let wordData = {};
 
   fetch(wordsURLDefinitions, wordsOptions)
     .then(function (response) {
@@ -98,10 +98,12 @@ function onsearch(word, initOrSearchHistory) {
           if (!initOrSearchHistory) {
             addHistoryItem(word);
           }
-
           searchInputElement.val("");
-          console.dir(searchInputElement);
         });
+    })
+    .catch((err) => {
+      console.log("Catch 1");
+      showErrorMessage("invalidSearch");
     });
 }
 
@@ -139,7 +141,9 @@ function renderExample(example, number) {
   exampleTitle.append(`Example ${number + 1}: `);
   // Append to elements
   exampleTextElement.append(exampleTitle);
-  exampleTextElement.append(`${example.charAt(0).toUpperCase() + example.slice(1)}`);
+  exampleTextElement.append(
+    `${example.charAt(0).toUpperCase() + example.slice(1)}`
+  );
   // Append sub-elements to example-element
   exampleElement.append(exampleTextElement);
   // Append to DOM
@@ -179,7 +183,7 @@ $(document).on("keypress", "#search", (event) => {
       onsearch(searchInputText, false);
     } else {
       // TODO: Invalid Input Alert/Modal
-      alert("Invalid Input");
+      showErrorMessage("emptySearch");
     }
   }
 });
@@ -215,4 +219,21 @@ function attachAudioEventHandler(audio) {
 $("#search-history-items").on("click", ".remove", removeHistoryItem);
 $("#search-history-items").on("click", ".searched-word", searchHistoryItem);
 
+function showErrorMessage(errorType) {
+  if (errorType == "emptySearch") {
+    $(".modal-header h5").text("Empty Search");
+    $(".modal-body p").text("Search cannot be empty.");
+  } else if (errorType == "invalidSearch") {
+    $(".modal-header h5").text("Invalid Search");
+    $(".modal-body p").text(
+      "Word not found. Please check spelling and try again"
+    );
+  } else {
+    return;
+  }
+  var myModal = new bootstrap.Modal(document.getElementById("myModal"), {
+    keyboard: false,
+  });
+  myModal.show();
+}
 init();
