@@ -1,0 +1,66 @@
+:root {
+  --primary: #001d51;
+  --secondary: #d9d9d9;
+  --tertiary: #e3e7ed;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--primary);
+}
+
+header {
+  background-image: url(../images/header_bg_image.jpg);
+  background-position: center;
+  background-size: cover;
+  min-height: 600px;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
+}
+
+header i {
+  position: absolute;
+  font-size: 3rem;
+  padding-left: 20px;
+  color: var(--primary);
+}
+
+body {
+  margin: 0;
+}
+
+input {
+  font-size: 2rem;
+  border: none;
+  padding-left: 100px;
+  min-width: 400px;
+}
+
+nav a {
+  position: absolute;
+}
+
+.navbar-brand {
+  font-size: 3rem;
+  background: white;
+  color: var(--primary);
+}
+
+.previous-searches {
+  background-color: var(--tertiary);
+}
+
+.search-history-item {
+  color: var(--primary);
+  background-color: var(--secondary);
+}
+
+#pronunciation h3 {
+  margin-bottom: 0px;
+}
+

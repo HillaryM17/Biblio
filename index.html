@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css"
+    />
+    <link rel="stylesheet" href="./assets/css/style.css" />
+    <title>Biblio</title>
+  </head>
+  <body>
+    <header class="container-fluid d-flex" id="header">
+      <nav class="nav">
+        <a class="navbar-brand ms-5 mt-5 px-5 text-uppercase" href="#"
+          >Biblio</a
+        >
+      </nav>
+      <div class="row mx-auto align-items-center">
+        <div class="col">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            class="w-100 rounded-pill py-3"
+            id="search"
+            placeholder="Search a word"
+            name="search"
+          />
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <p class="d-flex align-items-center">
+            <span class="display-1 text-capitalize" id="word">Word</span>
+            <button class="btn btn-primary ms-3" id="pronunciation">
+              <i class="bi bi-play-circle text-white"></i>
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <section
+      class="container mt-2 flex-column flex-md-row gx-2 mx-sm-1 mx-md-auto"
+    >
+      <div class="row">
+        <!-- Results section -->
+        <div class="col-12 col-md-10 px-4" id="result">
+          <div class="row">
+            <div class="col-12 col-md-6">
+              <div class="col-12">
+                <h3 class="text-uppercase">Definitions</h3>
+              </div>
+              <div class="row my-1" id="definition">
+                <div id="definitions" class="col definition">
+                  <p>
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                    Dignissimos rerum veritatis doloremque doloribus, earum
+                    libero repudiandae tempore quos saepe reiciendis qui impedit
+                    repellat voluptatem amet, nostrum soluta rem quis voluptate.
+                    Neque necessitatibus quisquam, officiis, sint quod quaerat,
+                    doloribus velit at quam rem hic id eligendi cum non.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="col-12">
+                <h3 class="text-uppercase">Examples</h3>
+              </div>
+              <div class="col" id="examples">
+                <div class="col">
+                  <p>
+                    <strong>Example 1:</strong>
+                    <span id="example-1"
+                      >Lorem ipsum, dolor sit amet consectetur adipisicing
+                      elit.Lorem ipsum, dolor sit amet consectetur adipisicing
+                      elit.
+                    </span>
+                  </p>
+                </div>
+                <div class="col">
+                  <p>
+                    <strong>Example 2:</strong>
+                    <span id="example-2"
+                      >Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                    </span>
+                  </p>
+                </div>
+                <div class="col">
+                  <p>
+                    <strong>Example 3:</strong>
+                    <span id="example-3"
+                      >Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col search-history px-4 py-4 rounded-2 mb-3">
+          <div class="row">
+            <div class="col">
+              <h4 class="text-uppercase">Search History</h4>
+            </div>
+          </div>
+          <div class="row gy-2" id="search-history-items">
+            <div
+              class="rounded-pill search-history-item d-flex align-items-center justify-content-between py-1"
+            >
+              <p class="m-0">Hello</p>
+              <i class="remove bi bi-x-lg"></i>
+            </div>
+            <div
+              class="rounded-pill search-history-item d-flex align-items-center justify-content-between py-1"
+            >
+              <p class="m-0">Test</p>
+              <i class="remove bi bi-x-lg"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="modal" id="myModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>Modal body text goes here.</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"
+      integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ"
+      crossorigin="anonymous"
+    ></script>
+    <!-- Code to the JavaScript File -->
+    <script src="assets/js/script.js"></script>
+  </body>
+</html>
