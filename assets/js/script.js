@@ -8,6 +8,9 @@ var wordDefinitionsArea = $("#definitions");
 var wordPronunciationButton = $("#pronunciation");
 var wordExamples = $("#examples");
 var historyContainer = $("#search-history-items");
+var modalHeader = $(".modal-header");
+var modalBody = $(".modal-body");
+
 var randomWords = [
   "rupee",
   "oligarch",
@@ -51,7 +54,7 @@ const speechOptions = {
   },
 };
 
-// Helper Function
+// Helper (abstractor) Function for Constructing Full URLS
 
 function constructFullURLs(word) {
   return {
@@ -152,7 +155,9 @@ function searchEnteredWord(event) {
 
 function searchHistoryItem(event) {
   let word = $(event.currentTarget).attr("data-word");
-  onSearch(word, true);
+  onSearch(word).then((wordData) => {
+    renderWord(wordData);
+  });
 }
 
 ///////////////////////////////////////////////////////////////
@@ -254,11 +259,11 @@ function validateInput(word) {
 
 function showErrorMessage(errorType) {
   if (errorType == "emptySearch") {
-    $(".modal-header h5").text("Empty Search");
-    $(".modal-body p").text("Search cannot be empty.");
+    modalHeader.text("Empty Search");
+    modalBody.text("Search cannot be empty.");
   } else if (errorType == "invalidSearch") {
-    $(".modal-header h5").text("Invalid Search");
-    $(".modal-body p").text("Word not found. Please check spelling and try again");
+    modalHeader.text("Invalid Search");
+    modalBody.text("Word not found. Please check spelling and try again");
   } else {
     return;
   }
@@ -273,12 +278,12 @@ function showErrorMessage(errorType) {
 ///////////////////////////////////////////////////////////////
 
 $(document).on("keypress", "#search", searchEnteredWord);
-$("#search-history-items").on("click", ".searched-word", searchHistoryItem);
-$("#search-history-items").on("click", ".remove", removeHistoryItem);
+historyContainer.on("click", ".searched-word", searchHistoryItem);
+historyContainer.on("click", ".remove", removeHistoryItem);
 wordPronunciationButton.on("click", audioControls.playAudio);
 
 ///////////////////////////////////////////////////////////////
-// AUDIO CONTROL OBJECT CONTRUCTOR
+// AUDIO CONTROLS (Object Constructor)
 ///////////////////////////////////////////////////////////////
 
 function AudioControls() {
