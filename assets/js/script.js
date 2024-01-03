@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////
 
 var searchInputElement = $("#search");
+var wordContainer = $("#word");
 var wordDefinitionsArea = $("#definitions");
 var wordPronunciationButton = $("#pronunciation");
 var wordExamples = $("#examples");
@@ -66,10 +67,10 @@ function constructFullURLs(word) {
 }
 
 ///////////////////////////////////////////////////////////////
-// ONSEARCH FUNCTION
+// SEARCH FUNCTION
 ///////////////////////////////////////////////////////////////
 
-function onsearch(word, initOrSearchHistory) {
+function onsearch(word) {
   // Construct Full API Query URLS
   const { definitionsURL, examplesURL, speechURL } = constructFullURLs(word);
 
@@ -84,41 +85,39 @@ function onsearch(word, initOrSearchHistory) {
     },
   };
 
-  // Fetch definitions data ...
-  fetch(definitionsURL, wordsOptions)
+  // Fetch 1:  definitions data ...
+  return fetch(definitionsURL, wordsOptions)
     .then(function (response) {
       return response.json();
     })
     .then(function (data) {
       // Definitions fetch is complete!
 
-      // Now just load into the wordData object ...
+      // Load into the wordData object ...
       wordData.definitions = [];
       for (let i = 0; i < data.definitions.length; i++) {
         wordData.definitions.push(data.definitions[i].definition);
       }
 
-      // Fetch examples data
-      fetch(examplesURL, wordsOptions)
+      // Fetch 2: examples data
+      return fetch(examplesURL, wordsOptions)
         .then(function (response) {
           return response.json();
         })
         .then(function (data) {
           // Examples fetch is complete!
 
-          // Now just load into the wordData object ...
+          // Load into the wordData object ...
           wordData.examples = data.examples;
 
-          // Fetch audio data (buffer) ...
+          // Fetch 3: audio data (buffer) ...
           fetch(speechURL, speechOptions)
             .then(function (response) {
               return response.arrayBuffer();
             })
-
             .then(function (arrayBuffer) {
               return wordData.audio.context.decodeAudioData(arrayBuffer);
             })
-
             .then(function (decodedAudioBuffer) {
               // Audio data fetch is complete!
 
@@ -126,14 +125,8 @@ function onsearch(word, initOrSearchHistory) {
               wordData.audio.buffer = decodedAudioBuffer;
             });
 
-          // wordData is now complete (except for audio.buffer, but renderWord does not depend on that)
-          renderWord(wordData);
-
-          if (!initOrSearchHistory) {
-            addHistoryItem(word);
-          }
-
-          searchInputElement.val("");
+          // wordData is now complete to point that can be used in renderWord()
+          return wordData;
         });
     })
     .catch((err) => {
@@ -141,12 +134,32 @@ function onsearch(word, initOrSearchHistory) {
     });
 }
 
+function searchEnteredWord(event) {
+  if (event.key == "Enter") {
+    let word = searchInputElement.val().trim();
+    if (validateInput(word)) {
+      onsearch(word).then((wordData) => {
+        renderWord(wordData);
+        addHistoryItem(word);
+        searchInputElement.val("");
+      });
+    } else {
+      showErrorMessage("emptySearch");
+    }
+  }
+}
+
+function searchHistoryItem(event) {
+  let word = $(event.currentTarget).attr("data-word");
+  onsearch(word, true);
+}
+
 ///////////////////////////////////////////////////////////////
 // RENDER FUNCTIONS
 ///////////////////////////////////////////////////////////////
 
 function renderWord({ word, definitions, audio, examples }) {
-  $("#word").text(word);
+  wordContainer.text(word);
   wordDefinitionsArea.empty();
   for (let i = 0; i < definitions.length; i++) {
     renderDefinition(definitions[i], i);
@@ -203,19 +216,9 @@ function renderHistory() {
   }
 }
 
-function removeHistoryItem(event) {
-  let index = $(event.currentTarget).attr("data-index");
-  let historyArray = JSON.parse(localStorage.getItem("history"));
-  historyArray.splice(index, 1);
-  historyArray = JSON.stringify(historyArray);
-  localStorage.setItem("history", historyArray);
-  renderHistory();
-}
-
-function searchHistoryItem(event) {
-  let word = $(event.currentTarget).attr("data-word");
-  onsearch(word, true);
-}
+///////////////////////////////////////////////////////////////
+// LOCAL STORAGE FUNCTIONS
+///////////////////////////////////////////////////////////////
 
 function addHistoryItem(item) {
   if (localStorage.getItem("history")) {
@@ -229,6 +232,15 @@ function addHistoryItem(item) {
   renderHistory();
 }
 
+function removeHistoryItem(event) {
+  let index = $(event.currentTarget).attr("data-index");
+  let historyArray = JSON.parse(localStorage.getItem("history"));
+  historyArray.splice(index, 1);
+  historyArray = JSON.stringify(historyArray);
+  localStorage.setItem("history", historyArray);
+  renderHistory();
+}
+
 ///////////////////////////////////////////////////////////////
 // VALIDATION FUNCTIONS
 ///////////////////////////////////////////////////////////////
@@ -239,35 +251,6 @@ function validateInput(word) {
   }
   return true;
 }
-
-///////////////////////////////////////////////////////////////
-// EVENT LISTENERS / HANDLERS
-///////////////////////////////////////////////////////////////
-
-$(document).on("keypress", "#search", (event) => {
-  if (event.key == "Enter") {
-    let searchInputText = searchInputElement.val().trim();
-    if (validateInput(searchInputText)) {
-      onsearch(searchInputText, false);
-    } else {
-      // TODO: Invalid Input Alert/Modal
-      showErrorMessage("emptySearch");
-    }
-  }
-});
-
-function attachAudioEventHandler(audio) {
-  wordPronunciationButton.off("click");
-  wordPronunciationButton.on("click", function () {
-    let bufferSource = audio.context.createBufferSource();
-    bufferSource.buffer = audio.buffer;
-    bufferSource.connect(audio.context.destination);
-    bufferSource.start(audio.context.currentTime);
-  });
-}
-
-$("#search-history-items").on("click", ".remove", removeHistoryItem);
-$("#search-history-items").on("click", ".searched-word", searchHistoryItem);
 
 function showErrorMessage(errorType) {
   if (errorType == "emptySearch") {
@@ -286,11 +269,32 @@ function showErrorMessage(errorType) {
 }
 
 ///////////////////////////////////////////////////////////////
+// ATTACH EVENT LISTENERS / ASSIGN EVENT HANDLERS
+///////////////////////////////////////////////////////////////
+
+$(document).on("keypress", "#search", searchEnteredWord);
+$("#search-history-items").on("click", ".searched-word", searchHistoryItem);
+$("#search-history-items").on("click", ".remove", removeHistoryItem);
+
+function attachAudioEventHandler(audio) {
+  wordPronunciationButton.off("click");
+  wordPronunciationButton.on("click", function () {
+    let bufferSource = audio.context.createBufferSource();
+    bufferSource.buffer = audio.buffer;
+    bufferSource.connect(audio.context.destination);
+    bufferSource.start(audio.context.currentTime);
+  });
+}
+
+///////////////////////////////////////////////////////////////
 // INITIALISE
 ///////////////////////////////////////////////////////////////
 
 function init() {
-  onsearch(randomWords[Math.floor(Math.random() * randomWords.length)], true);
+  let randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
+  onsearch(randomWord).then((wordData) => {
+    renderWord(wordData);
+  });
   renderHistory();
 }
 
