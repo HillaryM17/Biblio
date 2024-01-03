@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////
-// Initialise Global Variables
+// jQuery Element Variables
 ///////////////////////////////////////////////////////////////
 
 var searchInputElement = $("#search");
@@ -8,23 +8,18 @@ var wordDefinitionsArea = $("#definitions");
 var wordPronunciationButton = $("#pronunciation");
 var wordExamples = $("#examples");
 var historyContainer = $("#search-history-items");
+var modal = $("#myModal");
 var modalHeader = $(".modal-header");
 var modalBody = $(".modal-body");
-var randomWords = [
-  "rupee",
-  "oligarch",
-  "Cacao",
-  "Homer",
-  "recession",
-  "canny",
-  "foray",
-  "trove",
-  "saute",
-];
+
+///////////////////////////////////////////////////////////////
+// Audio Controller (Instance)
+///////////////////////////////////////////////////////////////
+
 let audioController = new AudioController();
 
 ///////////////////////////////////////////////////////////////
-// API STUFF
+// API Variables
 ///////////////////////////////////////////////////////////////
 
 // API Keys
@@ -53,29 +48,49 @@ const speechOptions = {
   },
 };
 
-// Helper (abstractor) Function for Constructing Full URLS
-
-function constructFullURLs(word) {
-  return {
-    definitionsURL: "https://wordsapiv1.p.rapidapi.com/words/" + word + "/definitions",
-    examplesURL: "https://wordsapiv1.p.rapidapi.com/words/" + word + "/examples",
-    speechURL:
-      "https://voicerss-text-to-speech.p.rapidapi.com/?" +
-      "key=" +
-      speechAPIKey +
-      "&src=" +
-      word +
-      "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono",
-  };
-}
-
 ///////////////////////////////////////////////////////////////
-// SEARCH FUNCTION
+// Add Event Listeners
 ///////////////////////////////////////////////////////////////
 
-function onSearch(word) {
-  // Construct Full API Query URLS
-  const { definitionsURL, examplesURL, speechURL } = constructFullURLs(word);
+$(document).on("keypress", "#search", searchEnteredWord);
+historyContainer.on("click", ".searched-word", searchHistoryItem);
+historyContainer.on("click", ".remove", removeHistoryItem);
+wordPronunciationButton.on("click", audioController.playAudio);
+
+///////////////////////////////////////////////////////////////
+// Initialise with Random Word Search
+///////////////////////////////////////////////////////////////
+
+var randomWords = [
+  "rupee",
+  "oligarch",
+  "Cacao",
+  "Homer",
+  "recession",
+  "canny",
+  "foray",
+  "trove",
+  "saute",
+];
+let randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
+search(randomWord);
+
+///////////////////////////////////////////////////////////////
+// Other Initialisation
+///////////////////////////////////////////////////////////////
+
+renderHistory();
+
+///////////////////////////////////////////////////////////////
+// SEARCH FUNCTIONS
+///////////////////////////////////////////////////////////////
+
+function search(word) {
+  // Construct Full URLS
+  let definitionsURL = wordsBaseURL + word + "/definitions";
+  let examplesURL = wordsBaseURL + word + "/examples";
+  let speechURL =
+    speechBaseURL + "key=" + speechAPIKey + "&src=" + word + "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono";
 
   // Declare new wordData object
   let wordData = {
@@ -99,7 +114,7 @@ function onSearch(word) {
       // Load into the wordData object ...
       wordData.definitions = [];
       for (let i = 0; i < data.definitions.length; i++) {
-        wordData.definitions.push(data.definitions[i].definition);
+        wordData.definitions.push(data.definitions[i].definition); // ERROR CAN HAPPENS HERE!
       }
 
       // Fetch 2: examples data
@@ -126,13 +141,18 @@ function onSearch(word) {
 
               // Now just load into the wordData object ...
               wordData.audio.buffer = decodedAudioBuffer;
+            })
+            .catch((error) => {
+              console.error("Error: in Audio Fetch");
             });
 
-          // wordData is now complete to point that can be used in renderWord()
-          return wordData;
+          // wordData is now complete to the point that can be used in renderWord()
+          renderWord(wordData);
+          return true;
         });
     })
-    .catch((err) => {
+    .catch((error) => {
+      console.error("Error: in Definitions Fetch or Examples Fetch");
       showErrorMessage("invalidSearch");
     });
 }
@@ -141,22 +161,21 @@ function searchEnteredWord(event) {
   if (event.key == "Enter") {
     let word = searchInputElement.val().trim();
     if (validateInput(word)) {
-      onSearch(word).then((wordData) => {
-        renderWord(wordData);
-        addHistoryItem(word);
-        searchInputElement.val("");
+      search(word).then((success) => {
+        if (success) {
+          addHistoryItem(word);
+          searchInputElement.val("");
+        } else {
+          showErrorMessage("emptySearch");
+        }
       });
-    } else {
-      showErrorMessage("emptySearch");
     }
   }
 }
 
 function searchHistoryItem(event) {
   let word = $(event.currentTarget).attr("data-word");
-  onSearch(word).then((wordData) => {
-    renderWord(wordData);
-  });
+  search(word);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -164,26 +183,30 @@ function searchHistoryItem(event) {
 ///////////////////////////////////////////////////////////////
 
 function renderWord({ word, definitions, audio, examples }) {
+  // Render Word name
   wordContainer.text(word);
+
+  // Render Definitions
   wordDefinitionsArea.empty();
   for (let i = 0; i < definitions.length; i++) {
     renderDefinition(definitions[i], i);
   }
+
+  // Render Examples
   wordExamples.empty();
   for (let i = 0; i < examples.length; i++) {
     renderExample(examples[i], i);
   }
+
+  // Inject word audio
   audioController.setAudio(audio);
 }
 
-function renderDefinition(definition, number) {
-  // Create element
+function renderDefinition(definition, index) {
+  let number = index + 1;
+  let text = `${definition[0].toUpperCase() + definition.slice(1)}`;
   let definitionElement = $("<p>");
-  // Append definition to element
-  definitionElement.text(
-    `${number + 1}. ${definition.charAt(0).toUpperCase() + definition.slice(1)}`
-  );
-  // Append to DOM
+  definitionElement.text(`${number}. ${text}`);
   wordDefinitionsArea.append(definitionElement);
 }
 
@@ -193,17 +216,23 @@ function renderExample(example, number) {
   let exampleTextElement = $("<p>");
   let exampleTitle = $("<span class='fw-bold'>");
   exampleTitle.append(`Example ${number + 1}: `);
+
   // Append to elements
   exampleTextElement.append(exampleTitle);
   exampleTextElement.append(`${example.charAt(0).toUpperCase() + example.slice(1)}`);
+
   // Append sub-elements to example-element
   exampleElement.append(exampleTextElement);
+
   // Append to DOM
   wordExamples.append(exampleElement);
 }
 
 function renderHistory() {
+  // Get history items
   let historyArray = JSON.parse(localStorage.getItem("history"));
+
+  // Render to DOM
   historyContainer.empty();
   if (historyArray) {
     for (let i = 0; i < historyArray.length; i++) {
@@ -221,7 +250,7 @@ function renderHistory() {
 }
 
 ///////////////////////////////////////////////////////////////
-// LOCAL STORAGE FUNCTIONS
+// HISTORY FUNCTIONS
 ///////////////////////////////////////////////////////////////
 
 function addHistoryItem(item) {
@@ -250,10 +279,7 @@ function removeHistoryItem(event) {
 ///////////////////////////////////////////////////////////////
 
 function validateInput(word) {
-  if (word.length < 1) {
-    return false;
-  }
-  return true;
+  if (word.length > 0) return true;
 }
 
 function showErrorMessage(errorType) {
@@ -264,25 +290,16 @@ function showErrorMessage(errorType) {
     modalHeader.text("Invalid Search");
     modalBody.text("Word not found. Please check spelling and try again");
   } else {
-    return;
+    return false;
   }
-  var myModal = new bootstrap.Modal(document.getElementById("myModal"), {
+  var myModal = new bootstrap.Modal(modal, {
     keyboard: false,
   });
   myModal.show();
 }
 
 ///////////////////////////////////////////////////////////////
-// ATTACH EVENT LISTENERS / ASSIGN EVENT HANDLERS
-///////////////////////////////////////////////////////////////
-
-$(document).on("keypress", "#search", searchEnteredWord);
-historyContainer.on("click", ".searched-word", searchHistoryItem);
-historyContainer.on("click", ".remove", removeHistoryItem);
-wordPronunciationButton.on("click", audioController.playAudio);
-
-///////////////////////////////////////////////////////////////
-// AUDIO CONTROLS (Object Constructor)
+// AUDIO CONTROLLER (Constructor)
 ///////////////////////////////////////////////////////////////
 
 function AudioController() {
@@ -299,17 +316,3 @@ function AudioController() {
     _audio = audio;
   };
 }
-
-///////////////////////////////////////////////////////////////
-// INITIALISE
-///////////////////////////////////////////////////////////////
-
-function init() {
-  let randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
-  onSearch(randomWord).then((wordData) => {
-    renderWord(wordData);
-  });
-  renderHistory();
-}
-
-init();
