@@ -10,7 +10,6 @@ var wordExamples = $("#examples");
 var historyContainer = $("#search-history-items");
 var modalHeader = $(".modal-header");
 var modalBody = $(".modal-body");
-
 var randomWords = [
   "rupee",
   "oligarch",
@@ -22,7 +21,7 @@ var randomWords = [
   "trove",
   "saute",
 ];
-let audioControls = new AudioControls();
+let audioController = new AudioController();
 
 ///////////////////////////////////////////////////////////////
 // API STUFF
@@ -280,13 +279,13 @@ function showErrorMessage(errorType) {
 $(document).on("keypress", "#search", searchEnteredWord);
 historyContainer.on("click", ".searched-word", searchHistoryItem);
 historyContainer.on("click", ".remove", removeHistoryItem);
-wordPronunciationButton.on("click", audioControls.playAudio);
+wordPronunciationButton.on("click", audioController.playAudio);
 
 ///////////////////////////////////////////////////////////////
 // AUDIO CONTROLS (Object Constructor)
 ///////////////////////////////////////////////////////////////
 
-function AudioControls() {
+function AudioController() {
   let _audio;
 
   this.playAudio = function () {
