@@ -165,10 +165,10 @@ function searchEnteredWord(event) {
         if (success) {
           addHistoryItem(word);
           searchInputElement.val("");
-        } else {
-          showErrorMessage("emptySearch");
         }
       });
+    } else {
+      showErrorMessage("emptySearch");
     }
   }
 }
