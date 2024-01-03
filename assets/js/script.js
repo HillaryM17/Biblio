@@ -70,7 +70,7 @@ function constructFullURLs(word) {
 // SEARCH FUNCTION
 ///////////////////////////////////////////////////////////////
 
-function onsearch(word) {
+function onSearch(word) {
   // Construct Full API Query URLS
   const { definitionsURL, examplesURL, speechURL } = constructFullURLs(word);
 
@@ -138,7 +138,7 @@ function searchEnteredWord(event) {
   if (event.key == "Enter") {
     let word = searchInputElement.val().trim();
     if (validateInput(word)) {
-      onsearch(word).then((wordData) => {
+      onSearch(word).then((wordData) => {
         renderWord(wordData);
         addHistoryItem(word);
         searchInputElement.val("");
@@ -151,7 +151,7 @@ function searchEnteredWord(event) {
 
 function searchHistoryItem(event) {
   let word = $(event.currentTarget).attr("data-word");
-  onsearch(word, true);
+  onSearch(word, true);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -292,7 +292,7 @@ function attachAudioEventHandler(audio) {
 
 function init() {
   let randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
-  onsearch(randomWord).then((wordData) => {
+  onSearch(randomWord).then((wordData) => {
     renderWord(wordData);
   });
   renderHistory();
