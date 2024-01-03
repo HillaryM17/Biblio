@@ -19,6 +19,7 @@ var randomWords = [
   "trove",
   "saute",
 ];
+let audioControls = new AudioControls();
 
 ///////////////////////////////////////////////////////////////
 // API STUFF
@@ -164,12 +165,11 @@ function renderWord({ word, definitions, audio, examples }) {
   for (let i = 0; i < definitions.length; i++) {
     renderDefinition(definitions[i], i);
   }
-  attachAudioEventHandler(audio);
-
   wordExamples.empty();
   for (let i = 0; i < examples.length; i++) {
     renderExample(examples[i], i);
   }
+  audioControls.setAudio(audio);
 }
 
 function renderDefinition(definition, number) {
@@ -275,15 +275,25 @@ function showErrorMessage(errorType) {
 $(document).on("keypress", "#search", searchEnteredWord);
 $("#search-history-items").on("click", ".searched-word", searchHistoryItem);
 $("#search-history-items").on("click", ".remove", removeHistoryItem);
+wordPronunciationButton.on("click", audioControls.playAudio);
 
-function attachAudioEventHandler(audio) {
-  wordPronunciationButton.off("click");
-  wordPronunciationButton.on("click", function () {
-    let bufferSource = audio.context.createBufferSource();
-    bufferSource.buffer = audio.buffer;
-    bufferSource.connect(audio.context.destination);
-    bufferSource.start(audio.context.currentTime);
-  });
+///////////////////////////////////////////////////////////////
+// AUDIO CONTROL OBJECT CONTRUCTOR
+///////////////////////////////////////////////////////////////
+
+function AudioControls() {
+  let _audio;
+
+  this.playAudio = function () {
+    let bufferSource = _audio.context.createBufferSource();
+    bufferSource.buffer = _audio.buffer;
+    bufferSource.connect(_audio.context.destination);
+    bufferSource.start(_audio.context.currentTime);
+  };
+
+  this.setAudio = function (audio) {
+    _audio = audio;
+  };
 }
 
 ///////////////////////////////////////////////////////////////
