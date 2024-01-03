@@ -173,7 +173,7 @@ function renderWord({ word, definitions, audio, examples }) {
   for (let i = 0; i < examples.length; i++) {
     renderExample(examples[i], i);
   }
-  audioControls.setAudio(audio);
+  audioController.setAudio(audio);
 }
 
 function renderDefinition(definition, number) {
