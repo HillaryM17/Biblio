@@ -48,7 +48,7 @@ function validateInput(word) {
 
 function onsearch(word, initOrSearchHistory) {
   const speechURL =
-    "https://voicerss-text-to-speech.p.rapidapi.com/?key=29817033d7724b75b251c42e890d195d&src=" +
+    "https://voicerss-text-to-speech.p.rapidapi.com/?key=17e8c83f04474613b13eb338fe823dd1&src=" +
     word +
     "&hl=en-us&r=0&c=mp3&f=8khz_8bit_mono";
   const wordsURLDefinitions = wordsBaseURL + word + wordsDefinitions;
